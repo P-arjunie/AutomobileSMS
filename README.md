@@ -1,4 +1,4 @@
-## denata mechcharai...
+
 
 ## Project Structure
 
