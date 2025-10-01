@@ -9,9 +9,9 @@ AutomobileSMS/
 │   ├── public/
 │   └── package.json
 │
-├── backend/           # Node.js + Express backend (To be implemented)
-│   └── (empty - ready for backend development)
+├── backend/           # Node.js + Express backend 
+│   └── 
 │
-└── README.md          #wistharee
+└── README.md          
 ```
 
