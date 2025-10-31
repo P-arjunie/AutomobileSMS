@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
-const Register = ({ onSwitchToLogin }) => {
+const Register = () => {
+  const navigate = useNavigate()
+  const { register, isLoading, error, clearError } = useAuth()
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -9,11 +14,14 @@ const Register = ({ onSwitchToLogin }) => {
     confirmPassword: '',
     phone: '',
     role: 'customer',
+    employeeId: '',
+    department: '',
     agreeToTerms: false
   })
 
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [formErrors, setFormErrors] = useState({})
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -21,24 +29,70 @@ const Register = ({ onSwitchToLogin }) => {
       ...prevState,
       [name]: type === 'checkbox' ? checked : value
     }))
+    
+    // Clear error when user starts typing
+    if (error) {
+      clearError()
+    }
+    
+    // Clear field-specific errors
+    if (formErrors[name]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }))
+    }
   }
 
-  const handleSubmit = (e) => {
+  const validateForm = () => {
+    const errors = {}
+    
+    if (!formData.firstName.trim()) errors.firstName = 'First name is required'
+    if (!formData.lastName.trim()) errors.lastName = 'Last name is required'
+    if (!formData.email.trim()) errors.email = 'Email is required'
+    if (!formData.phone.trim()) errors.phone = 'Phone number is required'
+    if (!formData.password) errors.password = 'Password is required'
+    if (formData.password.length < 6) errors.password = 'Password must be at least 6 characters'
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match'
+    }
+    if (!formData.agreeToTerms) errors.terms = 'You must agree to the terms and conditions'
+    
+    // Employee-specific validation
+    if (formData.role === 'employee') {
+      if (!formData.employeeId.trim()) errors.employeeId = 'Employee ID is required'
+      if (!formData.department) errors.department = 'Department is required'
+    }
+    
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match!')
+    if (!validateForm()) {
       return
     }
-    
-    if (!formData.agreeToTerms) {
-      alert('Please agree to the terms and conditions')
-      return
+
+    const registrationData = {
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      email: formData.email.trim(),
+      password: formData.password,
+      phone: formData.phone.trim(),
+      role: formData.role,
+      ...(formData.role === 'employee' && {
+        employeeId: formData.employeeId.trim(),
+        department: formData.department
+      })
     }
+
+    const result = await register(registrationData)
     
-    console.log('Registration submitted:', formData)
-    // TODO: Add registration logic here when backend is ready
-    alert(`Registration submitted!\nName: ${formData.firstName} ${formData.lastName}\nEmail: ${formData.email}\nRole: ${formData.role}`)
+    if (result.success) {
+      navigate('/dashboard')
+    }
   }
 
   return (
@@ -100,6 +154,61 @@ const Register = ({ onSwitchToLogin }) => {
                 </div>
               </div>
 
+              {/* Employee-specific fields */}
+              {formData.role === 'employee' && (
+                <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="text-sm font-semibold text-blue-800">Employee Information</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="employeeId" className="block text-sm font-medium text-primary-dark mb-2">
+                        Employee ID
+                      </label>
+                      <input
+                        type="text"
+                        id="employeeId"
+                        name="employeeId"
+                        value={formData.employeeId}
+                        onChange={handleChange}
+                        className={`block w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-purple focus:border-transparent transition duration-200 ${
+                          formErrors.employeeId ? 'border-red-300' : 'border-primary-blue/30'
+                        }`}
+                        placeholder="EMP001"
+                      />
+                      {formErrors.employeeId && (
+                        <p className="mt-1 text-sm text-red-600">{formErrors.employeeId}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="department" className="block text-sm font-medium text-primary-dark mb-2">
+                        Department
+                      </label>
+                      <select
+                        id="department"
+                        name="department"
+                        value={formData.department}
+                        onChange={handleChange}
+                        className={`block w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-purple focus:border-transparent transition duration-200 ${
+                          formErrors.department ? 'border-red-300' : 'border-primary-blue/30'
+                        }`}
+                      >
+                        <option value="">Select Department</option>
+                        <option value="mechanical">Mechanical</option>
+                        <option value="electrical">Electrical</option>
+                        <option value="bodywork">Bodywork</option>
+                        <option value="painting">Painting</option>
+                        <option value="inspection">Inspection</option>
+                        <option value="management">Management</option>
+                      </select>
+                      {formErrors.department && (
+                        <p className="mt-1 text-sm text-red-600">{formErrors.department}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Name Fields */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -112,10 +221,15 @@ const Register = ({ onSwitchToLogin }) => {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="block w-full px-3 py-2 border border-primary-blue/30 rounded-lg focus:ring-2 focus:ring-primary-purple focus:border-transparent transition duration-200"
+                    className={`block w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-purple focus:border-transparent transition duration-200 ${
+                      formErrors.firstName ? 'border-red-300' : 'border-primary-blue/30'
+                    }`}
                     placeholder="John"
                     required
                   />
+                  {formErrors.firstName && (
+                    <p className="mt-1 text-sm text-red-600">{formErrors.firstName}</p>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="lastName" className="block text-sm font-medium text-primary-dark mb-2">
@@ -127,10 +241,15 @@ const Register = ({ onSwitchToLogin }) => {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="block w-full px-3 py-2 border border-primary-blue/30 rounded-lg focus:ring-2 focus:ring-primary-purple focus:border-transparent transition duration-200"
+                    className={`block w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-purple focus:border-transparent transition duration-200 ${
+                      formErrors.lastName ? 'border-red-300' : 'border-primary-blue/30'
+                    }`}
                     placeholder="Doe"
                     required
                   />
+                  {formErrors.lastName && (
+                    <p className="mt-1 text-sm text-red-600">{formErrors.lastName}</p>
+                  )}
                 </div>
               </div>
 
@@ -290,21 +409,36 @@ const Register = ({ onSwitchToLogin }) => {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-primary-blue to-primary-purple text-white py-3 px-4 rounded-lg font-semibold hover:from-primary-purple hover:to-primary-blue focus:outline-none focus:ring-2 focus:ring-primary-blue focus:ring-offset-2 transform hover:scale-[1.02] transition duration-200 shadow-lg"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-primary-blue to-primary-purple text-white py-3 px-4 rounded-lg font-semibold hover:from-primary-purple hover:to-primary-blue focus:outline-none focus:ring-2 focus:ring-primary-blue focus:ring-offset-2 transform hover:scale-[1.02] transition duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                Create Account
+                {isLoading ? 'Creating Account...' : 'Create Account'}
               </button>
+
+              {/* Error Display */}
+              {error && (
+                <div className="text-red-600 text-sm text-center bg-red-50 border border-red-200 rounded-lg p-3">
+                  {error}
+                </div>
+              )}
+
+              {/* Form Errors */}
+              {formErrors.terms && (
+                <div className="text-red-600 text-sm text-center bg-red-50 border border-red-200 rounded-lg p-3">
+                  {formErrors.terms}
+                </div>
+              )}
             </form>
 
             {/* Sign In Link */}
             <p className="mt-4 text-center text-sm text-primary-dark">
               Already have an account?{' '}
-              <button
-                onClick={onSwitchToLogin}
+              <Link
+                to="/login"
                 className="font-medium text-primary-purple hover:text-primary-dark transition duration-200 underline"
               >
                 Sign in here
-              </button>
+              </Link>
             </p>
           </div>
         </div>

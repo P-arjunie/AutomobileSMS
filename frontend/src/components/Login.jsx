@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
-const Login = ({ onSwitchToRegister, onLoginSuccess }) => {
+const Login = () => {
+  const navigate = useNavigate()
+  const { login, isLoading, error, clearError } = useAuth()
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -15,17 +20,24 @@ const Login = ({ onSwitchToRegister, onLoginSuccess }) => {
       ...prevState,
       [name]: type === 'checkbox' ? checked : value
     }))
+    
+    // Clear error when user starts typing
+    if (error) {
+      clearError()
+    }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Login submitted:', formData)
-    // TODO: Add authentication logic here when backend is ready
-    // For now, simulate successful login
-    if (formData.email && formData.password) {
-      onLoginSuccess()
-    } else {
-      alert('Please enter email and password')
+    
+    if (!formData.email || !formData.password) {
+      return
+    }
+
+    const result = await login(formData)
+    
+    if (result.success) {
+      navigate('/dashboard')
     }
   }
 
@@ -137,10 +149,18 @@ const Login = ({ onSwitchToRegister, onLoginSuccess }) => {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-primary-blue to-primary-purple text-white py-3 px-4 rounded-lg font-semibold hover:from-primary-purple hover:to-primary-blue focus:outline-none focus:ring-2 focus:ring-primary-blue focus:ring-offset-2 transform hover:scale-[1.02] transition duration-200 shadow-lg"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-primary-blue to-primary-purple text-white py-3 px-4 rounded-lg font-semibold hover:from-primary-purple hover:to-primary-blue focus:outline-none focus:ring-2 focus:ring-primary-blue focus:ring-offset-2 transform hover:scale-[1.02] transition duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                Sign In
+                {isLoading ? 'Signing In...' : 'Sign In'}
               </button>
+
+              {/* Error Display */}
+              {error && (
+                <div className="text-red-600 text-sm text-center bg-red-50 border border-red-200 rounded-lg p-3">
+                  {error}
+                </div>
+              )}
             </form>
 
             {/* Divider */}
@@ -183,12 +203,12 @@ const Login = ({ onSwitchToRegister, onLoginSuccess }) => {
             {/* Sign Up Link */}
             <p className="mt-8 text-center text-sm text-primary-dark">
               Don't have an account?{' '}
-              <button
-                onClick={onSwitchToRegister}
+              <Link
+                to="/register"
                 className="font-medium text-primary-purple hover:text-primary-dark transition duration-200 underline"
               >
                 Sign up for free
-              </button>
+              </Link>
             </p>
           </div>
         </div>
