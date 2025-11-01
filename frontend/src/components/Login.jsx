@@ -37,7 +37,23 @@ const Login = () => {
     const result = await login(formData)
     
     if (result.success) {
-      navigate('/dashboard')
+      // Redirect admins to admin dashboard, others to regular dashboard
+      // The result should contain user info, but we can also check localStorage
+      setTimeout(() => {
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (storedUser.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
+      }, 100);
+      // Redirect based on user role
+      const user = JSON.parse(localStorage.getItem('user'))
+      if (user?.role === 'employee' || user?.role === 'admin') {
+        navigate('/employee/dashboard')
+      } else {
+        navigate('/dashboard')
+      }
     }
   }
 
