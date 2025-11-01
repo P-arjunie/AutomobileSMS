@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import Session from '../models/Session.js';
 
 export const authenticateToken = async (req, res, next) => {
   try {
@@ -13,20 +14,26 @@ export const authenticateToken = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-key');
-    
-    // Get user from database
-    const user = await User.findById(decoded.userId).select('-password');
-    
+
+    // Check session exists and is valid
+    const session = await Session.findOne({ token }).populate('userId');
+    if (!session) {
+      return res.status(401).json({ message: 'Session not found or token invalid.' });
+    }
+
+    if (session.expiresAt < new Date()) {
+      await Session.deleteOne({ _id: session._id });
+      return res.status(401).json({ message: 'Session expired.' });
+    }
+
+    const user = session.userId;
+
     if (!user) {
-      return res.status(401).json({ 
-        message: 'Token is not valid. User not found.' 
-      });
+      return res.status(401).json({ message: 'Token is not valid. User not found.' });
     }
 
     if (!user.isActive) {
-      return res.status(401).json({ 
-        message: 'Account is deactivated.' 
-      });
+      return res.status(401).json({ message: 'Account is deactivated.' });
     }
 
     req.user = user;

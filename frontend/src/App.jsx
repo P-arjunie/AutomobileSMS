@@ -12,6 +12,7 @@ import AllServicesOverview from './components/AllServicesOverview'
 import ReportsPage from './components/ReportsPage'
 import DevModeBypass from './components/DevModeBypass'
 import LoadingSpinner from './components/LoadingSpinner'
+import Profile from './components/Profile'
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -82,6 +83,11 @@ function AppContent() {
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           } />
           <Route path="/home" element={
