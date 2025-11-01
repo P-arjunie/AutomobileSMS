@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import socketService from '../utils/socket'
 import { appointmentsAPI, servicesAPI } from '../utils/api'
@@ -137,6 +138,7 @@ const Dashboard = () => {
                   {user.role}
                 </span>
               </div>
+              <Link to="/profile" className="bg-white border px-3 py-2 rounded-md text-sm text-primary-blue hover:bg-primary-light">Profile</Link>
               <button
                 onClick={handleLogout}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200"

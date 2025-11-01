@@ -7,6 +7,7 @@ import Register from './components/Register'
 import Home from './components/Home'
 import Dashboard from './components/Dashboard'
 import LoadingSpinner from './components/LoadingSpinner'
+import Profile from './components/Profile'
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -51,6 +52,11 @@ function AppContent() {
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           } />
           <Route path="/home" element={
