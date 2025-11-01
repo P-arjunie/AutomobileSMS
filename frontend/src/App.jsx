@@ -151,6 +151,7 @@ function AppContent() {
             <AdminRoute>
               <ReportsPage />
             </AdminRoute>
+          } />
           {/* Employee routes */}
           <Route path="/employee/dashboard" element={
             <EmployeeRoute>

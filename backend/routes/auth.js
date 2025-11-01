@@ -21,13 +21,40 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Check if employeeId is unique (for employees)
-    if (employeeId) {
-      const existingEmployee = await User.findOne({ employeeId });
-      if (existingEmployee) {
-        return res.status(400).json({ 
-          message: 'Employee ID already exists' 
-        });
+    // If creating an employee and no employeeId provided, generate one.
+    let resolvedEmployeeId = employeeId;
+    if (role === 'employee') {
+      // If provided, ensure uniqueness
+      if (resolvedEmployeeId) {
+        const existingEmployee = await User.findOne({ employeeId: resolvedEmployeeId });
+        if (existingEmployee) {
+          return res.status(400).json({ 
+            message: 'Employee ID already exists' 
+          });
+        }
+      } else {
+  // Generate a reasonably short unique employee id like EMP-XXXXXX
+        const maxAttempts = 5;
+        let attempt = 0;
+        let candidate;
+
+        while (attempt < maxAttempts) {
+          // 6 hex chars gives 16^6 ~ 16M combinations; prefix keeps it obvious
+          candidate = `EMP-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+          // check uniqueness
+          // eslint-disable-next-line no-await-in-loop
+          const exists = await User.findOne({ employeeId: candidate });
+          if (!exists) {
+            resolvedEmployeeId = candidate;
+            break;
+          }
+          attempt++;
+        }
+
+        // Fallback: deterministic if all attempts collided (extremely unlikely)
+        if (!resolvedEmployeeId) {
+          resolvedEmployeeId = `EMP-${Date.now().toString().slice(-8)}`;
+        }
       }
     }
 
@@ -39,7 +66,7 @@ router.post('/register', async (req, res) => {
       password,
       phone,
       role: role || 'customer',
-      employeeId,
+      employeeId: resolvedEmployeeId,
       department
     });
 
