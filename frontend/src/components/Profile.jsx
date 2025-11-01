@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { authAPI } from '../utils/api'
 import toast from 'react-hot-toast'
+import Header from './Header'
 
 const Profile = () => {
   const navigate = useNavigate()
@@ -111,34 +112,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header (same as dashboard) */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-primary-blue">Automobile SMS</h1>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-700">
-                Welcome, <span className="font-medium">{user?.firstName} {user?.lastName}</span>
-                <span className="ml-2 px-2 py-1 bg-primary-blue/10 text-primary-blue rounded-full text-xs">
-                  {user?.role}
-                </span>
-              </div>
-              <Link to="/profile" className="bg-white border px-3 py-2 rounded-md text-sm text-primary-blue hover:bg-primary-light">Profile</Link>
-              <button
-                onClick={async () => { await logout() }}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="max-w-3xl mx-auto py-10 px-4">
         <h2 className="text-2xl font-bold mb-6">Profile</h2>
