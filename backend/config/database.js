@@ -8,6 +8,7 @@ const connectDB = async () => {
     });
 
     console.log(`🗄️  MongoDB Connected: ${conn.connection.host}`);
+  console.log(`📚  Database name: ${conn.connection.name}`);
 
     // Connection event handlers
     mongoose.connection.on('error', (err) => {

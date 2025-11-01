@@ -8,6 +8,9 @@ import Home from './components/Home'
 import Dashboard from './components/Dashboard'
 import LoadingSpinner from './components/LoadingSpinner'
 import Profile from './components/Profile'
+import ForgotPassword from './components/ForgotPassword'
+import ResetPassword from './components/ResetPassword'
+import VerifyEmail from './components/VerifyEmail'
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -59,6 +62,9 @@ function AppContent() {
               <Profile />
             </ProtectedRoute>
           } />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/home" element={
             <ProtectedRoute>
               <Home />

@@ -48,6 +48,10 @@ export const authAPI = {
   changePassword: (payload) => api.put('/auth/password', payload),
   refreshToken: (payload) => api.post('/auth/refresh-token', payload),
   logout: (payload) => api.post('/auth/logout', payload),
+  forgotPassword: (payload) => api.post('/auth/forgot-password', payload),
+  resetPassword: (payload) => api.post('/auth/reset-password', payload),
+  sendVerification: () => api.post('/auth/send-verification'),
+  verifyEmail: (payload) => api.post('/auth/verify-email', payload),
 };
 
 // Appointments API calls
