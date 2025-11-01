@@ -11,6 +11,8 @@ import authRoutes from './routes/auth.js';
 import serviceRoutes from './routes/services.js';
 import appointmentRoutes from './routes/appointments.js';
 import employeeRoutes from './routes/employees.js';
+import adminRoutes from './routes/admin.js';
+import reportRoutes from './routes/reports.js';
 import timeLogRoutes from './routes/timeLogs.js';
 import employeeWorkRoutes from './routes/employeeWork.js';
 import { authenticateToken } from './middleware/auth.js';
@@ -78,6 +80,8 @@ app.use('/api/time-logs', authenticateToken, timeLogRoutes);
 // IMPORTANT: employeeWorkRoutes must come BEFORE employeeRoutes (specific routes before parameterized routes)
 app.use('/api/employees', authenticateToken, employeeWorkRoutes);
 app.use('/api/employees', authenticateToken, employeeRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/reports', reportRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

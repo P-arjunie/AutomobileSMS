@@ -6,6 +6,11 @@ import Login from './components/Login'
 import Register from './components/Register'
 import Home from './components/Home'
 import Dashboard from './components/Dashboard'
+import AdminDashboard from './components/AdminDashboard'
+import AllAppointmentsManagement from './components/AllAppointmentsManagement'
+import AllServicesOverview from './components/AllServicesOverview'
+import ReportsPage from './components/ReportsPage'
+import DevModeBypass from './components/DevModeBypass'
 import EmployeeDashboard from './components/EmployeeDashboard'
 import TimeLoggingInterface from './components/TimeLoggingInterface'
 import MyWorkPage from './components/MyWorkPage'
@@ -44,13 +49,39 @@ const EmployeeRoute = ({ children }) => {
 
 // Public Route component (redirect to dashboard if already authenticated)
 const PublicRoute = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, user } = useAuth()
   
   if (isLoading) {
     return <LoadingSpinner />
   }
   
-  return !isAuthenticated ? children : <Navigate to="/dashboard" replace />
+  if (isAuthenticated) {
+    // Redirect to admin dashboard if admin, otherwise regular dashboard
+    return user?.role === 'admin' 
+      ? <Navigate to="/admin/dashboard" replace />
+      : <Navigate to="/dashboard" replace />
+  }
+  
+  return children
+}
+
+// Admin Route component (requires admin role)
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, isLoading, user } = useAuth()
+  
+  if (isLoading) {
+    return <LoadingSpinner />
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+  
+  if (user?.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />
+  }
+  
+  return children
 }
 
 function AppContent() {
@@ -87,6 +118,33 @@ function AppContent() {
             </ProtectedRoute>
           } />
           
+          {/* Development Mode - Bypass auth for testing (REMOVE IN PRODUCTION!) */}
+          <Route path="/dev" element={<DevModeBypass />} />
+          <Route path="/dev/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/dev/admin/appointments" element={<AllAppointmentsManagement />} />
+          <Route path="/dev/admin/services" element={<AllServicesOverview />} />
+          <Route path="/dev/admin/reports" element={<ReportsPage />} />
+          
+          {/* Admin routes */}
+          <Route path="/admin/dashboard" element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          } />
+          <Route path="/admin/appointments" element={
+            <AdminRoute>
+              <AllAppointmentsManagement />
+            </AdminRoute>
+          } />
+          <Route path="/admin/services" element={
+            <AdminRoute>
+              <AllServicesOverview />
+            </AdminRoute>
+          } />
+          <Route path="/admin/reports" element={
+            <AdminRoute>
+              <ReportsPage />
+            </AdminRoute>
           {/* Employee routes */}
           <Route path="/employee/dashboard" element={
             <EmployeeRoute>
