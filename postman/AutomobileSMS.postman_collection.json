@@ -1,0 +1,326 @@
+{
+  "info": {
+    "name": "AutomobileSMS API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "d2b7a3de-6f9e-4b2f-9f7f-automobilesms"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register (customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"test.user@example.com\",\n  \"password\": \"Password123!\",\n  \"phone\": \"+94711234567\",\n  \"role\": \"customer\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.token) {",
+                  "  pm.environment.set('token', res.token);",
+                  "}",
+                  "if (res && res.refreshToken) {",
+                  "  pm.environment.set('refreshToken', res.refreshToken);",
+                  "}",
+                  "if (res && res.user && res.user.id) {",
+                  "  pm.environment.set('userId', res.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test.user@example.com\",\n  \"password\": \"Password123!\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Services",
+      "item": [
+        {
+          "name": "Get Service Types",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/services/types",
+              "host": ["{{baseUrl}}"],
+              "path": ["services", "types"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "item": [
+        {
+          "name": "List My Appointments (customer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/appointments",
+              "host": ["{{baseUrl}}"],
+              "path": ["appointments"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Available Slots",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/available-slots?date={{date}}&serviceType={{serviceType}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["appointments", "available-slots"],
+              "query": [
+                { "key": "date", "value": "{{date}}" },
+                { "key": "serviceType", "value": "{{serviceType}}" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Appointment",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Ensure we have a scheduledDate; default to now+3d at 10:00 for safety if not set",
+                  "if (!pm.environment.get('scheduledDate')) {",
+                  "  let d = new Date();",
+                  "  d.setDate(d.getDate() + 3);",
+                  "  d.setHours(10, 0, 0, 0);",
+                  "  pm.environment.set('scheduledDate', d.toISOString());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/appointments",
+              "host": ["{{baseUrl}}"],
+              "path": ["appointments"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceType\": \"oil-change\",\n  \"scheduledDate\": \"{{scheduledDate}}\",\n  \"description\": \"Oil change and filter replacement\",\n  \"priority\": \"medium\",\n  \"vehicle\": {\n    \"make\": \"Toyota\",\n    \"model\": \"Corolla\",\n    \"year\": 2018,\n    \"licensePlate\": \"ABC-1234\",\n    \"vin\": \"1HGCM82633A004352\",\n    \"mileage\": 45000\n  },\n  \"estimatedDuration\": 1,\n  \"estimatedCost\": 50\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Appointment By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/{{appointmentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["appointments", "{{appointmentId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Appointment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/{{appointmentId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["appointments", "{{appointmentId}}", "cancel"]
+            },
+            "body": { "mode": "raw", "raw": "{}" }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Status (employee/admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/{{appointmentId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["appointments", "{{appointmentId}}", "status"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"confirmed\",\n  \"notes\": \"Confirmed by staff.\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Employee (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/{{appointmentId}}/assign",
+              "host": ["{{baseUrl}}"],
+              "path": ["appointments", "{{appointmentId}}", "assign"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employeeUserId}}\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Request Modification (customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/{{appointmentId}}/modification-request",
+              "host": ["{{baseUrl}}"],
+              "path": ["appointments", "{{appointmentId}}", "modification-request"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Need to reschedule due to conflict\",\n  \"newScheduledDate\": \"{{scheduledDate}}\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/{{appointmentId}}/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["appointments", "{{appointmentId}}", "notes"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Customer provided additional details.\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api" },
+    { "key": "token", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "appointmentId", "value": "" },
+    { "key": "employeeUserId", "value": "" },
+    { "key": "serviceType", "value": "oil-change" },
+    { "key": "date", "value": "2025-11-14" },
+    { "key": "scheduledDate", "value": "" }
+  ]
+}

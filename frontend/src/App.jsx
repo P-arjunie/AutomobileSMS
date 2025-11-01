@@ -19,6 +19,8 @@ import Profile from './components/Profile'
 import ForgotPassword from './components/ForgotPassword'
 import ResetPassword from './components/ResetPassword'
 import VerifyEmail from './components/VerifyEmail'
+import BookAppointment from './components/BookAppointment'
+import MyAppointments from './components/MyAppointments'
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -118,6 +120,16 @@ function AppContent() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/appointments/book" element={
+            <ProtectedRoute>
+              <BookAppointment />
+            </ProtectedRoute>
+          } />
+          <Route path="/appointments/my" element={
+            <ProtectedRoute>
+              <MyAppointments />
+            </ProtectedRoute>
+          } />
           <Route path="/home" element={
             <ProtectedRoute>
               <Home />
