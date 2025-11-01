@@ -10,6 +10,7 @@ import EmployeeDashboard from './components/EmployeeDashboard'
 import TimeLoggingInterface from './components/TimeLoggingInterface'
 import MyWorkPage from './components/MyWorkPage'
 import LoadingSpinner from './components/LoadingSpinner'
+import Profile from './components/Profile'
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -73,6 +74,11 @@ function AppContent() {
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           } />
           <Route path="/home" element={

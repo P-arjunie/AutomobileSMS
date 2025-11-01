@@ -45,8 +45,9 @@ export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),
   getProfile: () => api.get('/auth/profile'),
   updateProfile: (userData) => api.put('/auth/profile', userData),
-  refreshToken: () => api.post('/auth/refresh-token'),
-  logout: () => api.post('/auth/logout'),
+  changePassword: (payload) => api.put('/auth/password', payload),
+  refreshToken: (payload) => api.post('/auth/refresh-token', payload),
+  logout: (payload) => api.post('/auth/logout', payload),
 };
 
 // Appointments API calls

@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 const initialState = {
   user: null,
   token: null,
+  refreshToken: null,
   isAuthenticated: false,
   isLoading: true,
   error: null,
@@ -43,6 +44,7 @@ const authReducer = (state, action) => {
         ...state,
         user: action.payload.user,
         token: action.payload.token,
+        refreshToken: action.payload.refreshToken || state.refreshToken,
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -74,6 +76,7 @@ const authReducer = (state, action) => {
         ...state,
         user: action.payload.user,
         token: action.payload.token,
+        refreshToken: action.payload.refreshToken || null,
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -110,6 +113,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const token = localStorage.getItem('token');
         const user = localStorage.getItem('user');
+        const refreshToken = localStorage.getItem('refreshToken');
 
         if (token && user) {
           dispatch({
@@ -117,6 +121,7 @@ export const AuthProvider = ({ children }) => {
             payload: {
               token,
               user: JSON.parse(user),
+              refreshToken
             },
           });
 
@@ -140,15 +145,16 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.LOGIN_START });
 
       const response = await authAPI.login(credentials);
-      const { token, user } = response.data;
+      const { token, user, refreshToken } = response.data;
 
       // Store in localStorage
       localStorage.setItem('token', token);
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
 
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
-        payload: { token, user },
+        payload: { token, user, refreshToken },
       });
 
       // Connect to socket
@@ -175,15 +181,16 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.REGISTER_START });
 
       const response = await authAPI.register(userData);
-      const { token, user } = response.data;
+      const { token, user, refreshToken } = response.data;
 
       // Store in localStorage
       localStorage.setItem('token', token);
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
 
       dispatch({
         type: AUTH_ACTIONS.REGISTER_SUCCESS,
-        payload: { token, user },
+        payload: { token, user, refreshToken },
       });
 
       // Connect to socket
@@ -207,12 +214,14 @@ export const AuthProvider = ({ children }) => {
   // Logout function
   const logout = async () => {
     try {
-      await authAPI.logout();
+      const refreshToken = localStorage.getItem('refreshToken');
+      await authAPI.logout({ refreshToken });
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       // Clear localStorage
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
 
       // Disconnect socket
@@ -255,11 +264,16 @@ export const AuthProvider = ({ children }) => {
   // Refresh token function
   const refreshToken = async () => {
     try {
-      const response = await authAPI.refreshToken();
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      const response = await authAPI.refreshToken({ refreshToken });
       const { token } = response.data;
 
       localStorage.setItem('token', token);
-      
+
       // Reconnect socket with new token
       socketService.disconnect();
       socketService.connect(token);
