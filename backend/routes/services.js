@@ -5,6 +5,41 @@ import { authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Get available service types with metadata
+router.get('/types', async (req, res) => {
+  try {
+    const enumValues = Appointment.schema.path('serviceType').enumValues || [];
+
+    // Provide display names, estimated duration and base price hints
+    const meta = {
+      'oil-change': { name: 'Oil Change', estimatedDuration: 1, basePrice: 40 },
+      'brake-service': { name: 'Brake Service', estimatedDuration: 2, basePrice: 150 },
+      'tire-rotation': { name: 'Tire Rotation', estimatedDuration: 1, basePrice: 30 },
+      'engine-diagnostic': { name: 'Engine Diagnostic', estimatedDuration: 2, basePrice: 100 },
+      'transmission-service': { name: 'Transmission Service', estimatedDuration: 3, basePrice: 300 },
+      'air-conditioning': { name: 'Air Conditioning', estimatedDuration: 2, basePrice: 180 },
+      'battery-service': { name: 'Battery Service', estimatedDuration: 1, basePrice: 80 },
+      'general-inspection': { name: 'General Inspection', estimatedDuration: 1, basePrice: 50 },
+      'bodywork': { name: 'Bodywork', estimatedDuration: 4, basePrice: 500 },
+      'painting': { name: 'Painting', estimatedDuration: 4, basePrice: 600 },
+      'other': { name: 'Other', estimatedDuration: 2, basePrice: 0 }
+    };
+
+    const types = enumValues.map(v => ({
+      id: v,
+      key: v,
+      displayName: meta[v]?.name || v,
+      estimatedDuration: meta[v]?.estimatedDuration || 2,
+      basePrice: meta[v]?.basePrice ?? 0
+    }));
+
+    res.json({ types, count: types.length });
+  } catch (error) {
+    console.error('Get service types error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Get service logs
 router.get('/', async (req, res) => {
   try {

@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 const Home = ({ onLogout }) => {
   return (
@@ -14,15 +15,18 @@ const Home = ({ onLogout }) => {
               <span className="text-xl font-bold text-primary-dark">Automobile SMS</span>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="text-primary-dark hover:text-primary-blue transition duration-200">
+              <Link to="/dashboard" className="text-primary-dark hover:text-primary-blue transition duration-200">
                 Dashboard
-              </button>
-              <button className="text-primary-dark hover:text-primary-blue transition duration-200">
+              </Link>
+              <Link to="/appointments/book" className="text-primary-dark hover:text-primary-blue transition duration-200">
+                Appointments
+              </Link>
+              <Link to="#" className="text-primary-dark hover:text-primary-blue transition duration-200">
                 Vehicles
-              </button>
-              <button className="text-primary-dark hover:text-primary-blue transition duration-200">
+              </Link>
+              <Link to="#" className="text-primary-dark hover:text-primary-blue transition duration-200">
                 Messages
-              </button>
+              </Link>
               <button 
                 onClick={onLogout}
                 className="bg-primary-blue text-white px-4 py-2 rounded-lg hover:bg-primary-purple transition duration-200"

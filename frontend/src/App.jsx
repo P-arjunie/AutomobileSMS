@@ -8,6 +8,8 @@ import Home from './components/Home'
 import Dashboard from './components/Dashboard'
 import LoadingSpinner from './components/LoadingSpinner'
 import Profile from './components/Profile'
+import BookAppointment from './components/BookAppointment'
+import MyAppointments from './components/MyAppointments'
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -57,6 +59,16 @@ function AppContent() {
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/appointments/book" element={
+            <ProtectedRoute>
+              <BookAppointment />
+            </ProtectedRoute>
+          } />
+          <Route path="/appointments/my" element={
+            <ProtectedRoute>
+              <MyAppointments />
             </ProtectedRoute>
           } />
           <Route path="/home" element={

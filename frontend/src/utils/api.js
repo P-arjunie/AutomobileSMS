@@ -59,6 +59,8 @@ export const appointmentsAPI = {
   assign: (id, employeeData) => api.patch(`/appointments/${id}/assign`, employeeData),
   requestModification: (id, requestData) => api.post(`/appointments/${id}/modification-request`, requestData),
   addNote: (id, noteData) => api.post(`/appointments/${id}/notes`, noteData),
+  cancel: (id) => api.patch(`/appointments/${id}/cancel`),
+  getAvailableSlots: (params) => api.get('/appointments/available-slots', { params }),
 };
 
 // Services API calls
@@ -69,6 +71,7 @@ export const servicesAPI = {
   update: (id, serviceData) => api.put(`/services/${id}`, serviceData),
   complete: (id) => api.patch(`/services/${id}/complete`),
   getSummary: (employeeId, params) => api.get(`/services/summary/employee/${employeeId}`, { params }),
+  getTypes: () => api.get('/services/types'),
 };
 
 // Employees API calls
