@@ -37,7 +37,13 @@ const Login = () => {
     const result = await login(formData)
     
     if (result.success) {
-      navigate('/dashboard')
+      // Redirect based on user role
+      const user = JSON.parse(localStorage.getItem('user'))
+      if (user?.role === 'employee' || user?.role === 'admin') {
+        navigate('/employee/dashboard')
+      } else {
+        navigate('/dashboard')
+      }
     }
   }
 
