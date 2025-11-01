@@ -11,6 +11,9 @@ import AllAppointmentsManagement from './components/AllAppointmentsManagement'
 import AllServicesOverview from './components/AllServicesOverview'
 import ReportsPage from './components/ReportsPage'
 import DevModeBypass from './components/DevModeBypass'
+import EmployeeDashboard from './components/EmployeeDashboard'
+import TimeLoggingInterface from './components/TimeLoggingInterface'
+import MyWorkPage from './components/MyWorkPage'
 import LoadingSpinner from './components/LoadingSpinner'
 import Profile from './components/Profile'
 
@@ -23,6 +26,25 @@ const ProtectedRoute = ({ children }) => {
   }
   
   return isAuthenticated ? children : <Navigate to="/login" replace />
+}
+
+// Employee-only Route component
+const EmployeeRoute = ({ children }) => {
+  const { isAuthenticated, isLoading, user } = useAuth()
+  
+  if (isLoading) {
+    return <LoadingSpinner />
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+  
+  if (user && (user.role === 'employee' || user.role === 'admin')) {
+    return children
+  }
+  
+  return <Navigate to="/dashboard" replace />
 }
 
 // Public Route component (redirect to dashboard if already authenticated)
@@ -123,6 +145,21 @@ function AppContent() {
             <AdminRoute>
               <ReportsPage />
             </AdminRoute>
+          {/* Employee routes */}
+          <Route path="/employee/dashboard" element={
+            <EmployeeRoute>
+              <EmployeeDashboard />
+            </EmployeeRoute>
+          } />
+          <Route path="/employee/time-logging" element={
+            <EmployeeRoute>
+              <TimeLoggingInterface />
+            </EmployeeRoute>
+          } />
+          <Route path="/employee/my-work" element={
+            <EmployeeRoute>
+              <MyWorkPage />
+            </EmployeeRoute>
           } />
           
           {/* Default redirect */}

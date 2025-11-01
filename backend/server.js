@@ -13,6 +13,8 @@ import appointmentRoutes from './routes/appointments.js';
 import employeeRoutes from './routes/employees.js';
 import adminRoutes from './routes/admin.js';
 import reportRoutes from './routes/reports.js';
+import timeLogRoutes from './routes/timeLogs.js';
+import employeeWorkRoutes from './routes/employeeWork.js';
 import { authenticateToken } from './middleware/auth.js';
 import { setupSocketHandlers } from './socket/socketHandlers.js';
 
@@ -74,6 +76,9 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/services', authenticateToken, serviceRoutes);
 app.use('/api/appointments', authenticateToken, appointmentRoutes);
+app.use('/api/time-logs', authenticateToken, timeLogRoutes);
+// IMPORTANT: employeeWorkRoutes must come BEFORE employeeRoutes (specific routes before parameterized routes)
+app.use('/api/employees', authenticateToken, employeeWorkRoutes);
 app.use('/api/employees', authenticateToken, employeeRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);

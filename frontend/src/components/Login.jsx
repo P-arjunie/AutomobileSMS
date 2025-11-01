@@ -47,6 +47,13 @@ const Login = () => {
           navigate('/dashboard');
         }
       }, 100);
+      // Redirect based on user role
+      const user = JSON.parse(localStorage.getItem('user'))
+      if (user?.role === 'employee' || user?.role === 'admin') {
+        navigate('/employee/dashboard')
+      } else {
+        navigate('/dashboard')
+      }
     }
   }
 
