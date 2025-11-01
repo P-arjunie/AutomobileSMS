@@ -86,4 +86,38 @@ export const healthAPI = {
   check: () => api.get('/health'),
 };
 
+// Admin API calls
+export const adminAPI = {
+  // Dashboard stats
+  getDashboardStats: () => api.get('/admin/dashboard-stats'),
+  
+  // Appointments
+  getAllAppointments: (params) => api.get('/admin/appointments', { params }),
+  
+  // Services
+  getAllServices: (params) => api.get('/admin/services', { params }),
+  
+  // Employees
+  getEmployeePerformance: (params) => api.get('/admin/employees/performance', { params }),
+  
+  // Customers
+  getAllCustomers: (params) => api.get('/admin/customers', { params }),
+  
+  // Reports
+  getServiceReports: (params) => api.get('/admin/reports/services', { params }),
+  getAppointmentReports: (params) => api.get('/admin/reports/appointments', { params }),
+};
+
+// Reports API calls
+export const reportsAPI = {
+  generate: (reportData) => api.post('/reports/generate', reportData),
+  export: (params) => api.get('/reports/export', { 
+    params,
+    responseType: 'blob' // Important for file downloads
+  }),
+  getAll: (params) => api.get('/reports', { params }),
+  getById: (id) => api.get(`/reports/${id}`),
+  delete: (id) => api.delete(`/reports/${id}`),
+};
+
 export default api;

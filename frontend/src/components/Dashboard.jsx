@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 import socketService from '../utils/socket'
 import { appointmentsAPI, servicesAPI } from '../utils/api'
 import toast from 'react-hot-toast'
 
 const Dashboard = () => {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [appointments, setAppointments] = useState([])
   const [serviceLogs, setServiceLogs] = useState([])
   const [stats, setStats] = useState({
@@ -124,10 +126,39 @@ const Dashboard = () => {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
+            <div className="flex items-center space-x-6">
               <div className="flex-shrink-0">
                 <h1 className="text-2xl font-bold text-primary-blue">Automobile SMS</h1>
               </div>
+              {/* Admin Navigation Links */}
+              {user.role === 'admin' && (
+                <nav className="hidden md:flex space-x-4">
+                  <button
+                    onClick={() => navigate('/admin/dashboard')}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200"
+                  >
+                    Admin Dashboard
+                  </button>
+                  <button
+                    onClick={() => navigate('/admin/appointments')}
+                    className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    All Appointments
+                  </button>
+                  <button
+                    onClick={() => navigate('/admin/services')}
+                    className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    All Services
+                  </button>
+                  <button
+                    onClick={() => navigate('/admin/reports')}
+                    className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Reports
+                  </button>
+                </nav>
+              )}
             </div>
             
             <div className="flex items-center space-x-4">
@@ -150,6 +181,33 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Admin Notice Banner */}
+        {user.role === 'admin' && (
+          <div className="mb-6 bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <svg className="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p className="text-sm font-medium text-blue-800">
+                    You are logged in as an administrator
+                  </p>
+                  <p className="text-sm text-blue-600">
+                    Access the full Admin Dashboard to view system-wide statistics, manage all appointments, and generate reports.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/admin/dashboard')}
+                className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200 whitespace-nowrap"
+              >
+                Go to Admin Dashboard →
+              </button>
+            </div>
+          </div>
+        )}
+        
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
