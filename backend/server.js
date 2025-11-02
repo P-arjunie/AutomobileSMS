@@ -11,6 +11,7 @@ import authRoutes from './routes/auth.js';
 import serviceRoutes from './routes/services.js';
 import appointmentRoutes from './routes/appointments.js';
 import employeeRoutes from './routes/employees.js';
+import vehicleRoutes from './routes/vehicles.js';
 import { authenticateToken } from './middleware/auth.js';
 import { setupSocketHandlers } from './socket/socketHandlers.js';
 
@@ -73,6 +74,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/services', authenticateToken, serviceRoutes);
 app.use('/api/appointments', authenticateToken, appointmentRoutes);
 app.use('/api/employees', authenticateToken, employeeRoutes);
+app.use('/api/vehicles', authenticateToken, vehicleRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

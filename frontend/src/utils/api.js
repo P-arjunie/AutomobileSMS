@@ -85,6 +85,14 @@ export const employeesAPI = {
   activate: (id) => api.patch(`/employees/${id}/activate`),
 };
 
+// Vehicles API calls
+export const vehiclesAPI = {
+  getAll: () => api.get('/vehicles'), // current user's vehicles
+  create: (data) => api.post('/vehicles', data),
+  update: (id, data) => api.put(`/vehicles/${id}`, data),
+  remove: (id) => api.delete(`/vehicles/${id}`),
+};
+
 // Health check
 export const healthAPI = {
   check: () => api.get('/health'),

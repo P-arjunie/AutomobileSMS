@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { appointmentsAPI, servicesAPI } from '../utils/api';
+import { appointmentsAPI, servicesAPI, vehiclesAPI } from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
 
 const fmtTime = (iso) => {
   try {
@@ -14,6 +15,7 @@ const fmtTime = (iso) => {
 
 export default function BookAppointment() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [serviceTypes, setServiceTypes] = useState([]);
   const [loadingTypes, setLoadingTypes] = useState(false);
   const currentYear = new Date().getFullYear();
@@ -36,6 +38,9 @@ export default function BookAppointment() {
   const [dateOnly, setDateOnly] = useState(''); // YYYY-MM-DD
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [savedVehicles, setSavedVehicles] = useState([]);
+  const [useSaved, setUseSaved] = useState(true);
+  const [selectedVehicleId, setSelectedVehicleId] = useState('');
 
   // Load service types
   useEffect(() => {
@@ -55,6 +60,25 @@ export default function BookAppointment() {
     loadTypes();
     return () => { mounted = false; };
   }, []);
+
+  // Load saved vehicles (customers)
+  useEffect(() => {
+    const loadVehicles = async () => {
+      try {
+        if (user?.role !== 'customer') return;
+        const { data } = await vehiclesAPI.getAll();
+        setSavedVehicles(data.vehicles || []);
+        if ((data.vehicles || []).length > 0) {
+          setUseSaved(true);
+        } else {
+          setUseSaved(false);
+        }
+      } catch (e) {
+        // Non-blocking
+      }
+    };
+    loadVehicles();
+  }, [user?.role]);
 
   // Load available slots when date or serviceType changes
   useEffect(() => {
@@ -87,8 +111,28 @@ export default function BookAppointment() {
     if (name.startsWith('vehicle.')) {
       const key = name.split('.')[1];
       setForm(prev => ({ ...prev, vehicle: { ...prev.vehicle, [key]: value } }));
+      setUseSaved(false);
     } else {
       setForm(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const onSelectSavedVehicle = (id) => {
+    setSelectedVehicleId(id);
+    const v = savedVehicles.find(x => x._id === id);
+    if (v) {
+      setForm(prev => ({
+        ...prev,
+        vehicle: {
+          make: v.make,
+          model: v.model,
+          year: v.year,
+          licensePlate: v.licensePlate,
+          vin: v.vin || '',
+          mileage: typeof v.mileage === 'number' ? String(v.mileage) : ''
+        }
+      }));
+      setUseSaved(true);
     }
   };
 
@@ -142,7 +186,12 @@ export default function BookAppointment() {
 
       const { data } = await appointmentsAPI.create(payload);
       toast.success('Appointment booked');
-      navigate(`/appointments/my`);
+      const id = data?.appointment?._id || data?.appointment?.id || data?.id;
+      if (id) {
+        navigate(`/appointments/confirm/${id}`);
+      } else {
+        navigate(`/appointments/my`);
+      }
     } catch (e) {
       const serverMsg = e.response?.data?.message;
       const firstDetail = Array.isArray(e.response?.data?.errors) ? e.response.data.errors[0] : undefined;
@@ -234,30 +283,58 @@ export default function BookAppointment() {
 
           <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow p-5 mt-6">
             <h2 className="text-lg font-semibold text-primary-dark mb-4">Vehicle Details</h2>
+            {/* Saved vehicles selector */}
+            {user?.role === 'customer' && (
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-700">Use Saved Vehicle</label>
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={useSaved} onChange={e => setUseSaved(e.target.checked)} disabled={savedVehicles.length === 0} />
+                      Use from my vehicles
+                    </label>
+                    <Link to="/vehicles" className="text-sm text-primary-blue hover:underline">Manage Vehicles</Link>
+                  </div>
+                </div>
+                <select
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 disabled:bg-gray-100"
+                  disabled={!useSaved || savedVehicles.length === 0}
+                  value={selectedVehicleId}
+                  onChange={e => onSelectSavedVehicle(e.target.value)}
+                >
+                  <option value="">{savedVehicles.length ? 'Select a saved vehicle' : 'No saved vehicles'}</option>
+                  {savedVehicles.map(v => (
+                    <option key={v._id} value={v._id}>
+                      {(v.nickname ? `${v.nickname} • ` : '') + `${v.make} ${v.model} • ${v.year} • ${v.licensePlate}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Make</label>
-                <input name="vehicle.make" value={form.vehicle.make} onChange={handleChange} className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent" required />
+                <input name="vehicle.make" value={form.vehicle.make} onChange={handleChange} disabled={useSaved} className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent disabled:bg-gray-100" required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Model</label>
-                <input name="vehicle.model" value={form.vehicle.model} onChange={handleChange} className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent" required />
+                <input name="vehicle.model" value={form.vehicle.model} onChange={handleChange} disabled={useSaved} className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent disabled:bg-gray-100" required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Year</label>
-                <input type="number" name="vehicle.year" value={form.vehicle.year} onChange={handleChange} min={1900} max={currentYear + 1} step={1} inputMode="numeric" className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent" required />
+                <input type="number" name="vehicle.year" value={form.vehicle.year} onChange={handleChange} disabled={useSaved} min={1900} max={currentYear + 1} step={1} inputMode="numeric" className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent disabled:bg-gray-100" required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">License Plate</label>
-                <input name="vehicle.licensePlate" value={form.vehicle.licensePlate} onChange={handleChange} className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent" required />
+                <input name="vehicle.licensePlate" value={form.vehicle.licensePlate} onChange={handleChange} disabled={useSaved} className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent disabled:bg-gray-100" required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">VIN (optional)</label>
-                <input name="vehicle.vin" value={form.vehicle.vin} onChange={handleChange} className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent" />
+                <input name="vehicle.vin" value={form.vehicle.vin} onChange={handleChange} disabled={useSaved} className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent disabled:bg-gray-100" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Mileage (optional)</label>
-                <input type="number" name="vehicle.mileage" value={form.vehicle.mileage} onChange={handleChange} min={0} step={1} inputMode="numeric" className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent" />
+                <input type="number" name="vehicle.mileage" value={form.vehicle.mileage} onChange={handleChange} disabled={useSaved} min={0} step={1} inputMode="numeric" className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent disabled:bg-gray-100" />
               </div>
             </div>
 

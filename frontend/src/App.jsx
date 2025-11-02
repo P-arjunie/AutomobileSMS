@@ -10,6 +10,8 @@ import LoadingSpinner from './components/LoadingSpinner'
 import Profile from './components/Profile'
 import BookAppointment from './components/BookAppointment'
 import MyAppointments from './components/MyAppointments'
+import AppointmentConfirmed from './components/AppointmentConfirmed'
+import Vehicles from './components/Vehicles'
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -31,6 +33,17 @@ const PublicRoute = ({ children }) => {
   }
   
   return !isAuthenticated ? children : <Navigate to="/dashboard" replace />
+}
+
+// Role-based route wrapper
+const RoleRoute = ({ roles, children }) => {
+  const { isAuthenticated, isLoading, user } = useAuth()
+  if (isLoading) return <LoadingSpinner />
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (roles && roles.length > 0 && !roles.includes(user?.role)) {
+    return <Navigate to="/dashboard" replace />
+  }
+  return children
 }
 
 function AppContent() {
@@ -63,7 +76,9 @@ function AppContent() {
           } />
           <Route path="/appointments/book" element={
             <ProtectedRoute>
-              <BookAppointment />
+              <RoleRoute roles={['customer']}>
+                <BookAppointment />
+              </RoleRoute>
             </ProtectedRoute>
           } />
           <Route path="/appointments/my" element={
@@ -71,9 +86,23 @@ function AppContent() {
               <MyAppointments />
             </ProtectedRoute>
           } />
+          <Route path="/appointments/confirm/:id" element={
+            <ProtectedRoute>
+              <RoleRoute roles={['customer']}>
+                <AppointmentConfirmed />
+              </RoleRoute>
+            </ProtectedRoute>
+          } />
           <Route path="/home" element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          } />
+          <Route path="/vehicles" element={
+            <ProtectedRoute>
+              <RoleRoute roles={['customer']}>
+                <Vehicles />
+              </RoleRoute>
             </ProtectedRoute>
           } />
           

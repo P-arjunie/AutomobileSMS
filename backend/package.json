@@ -12,7 +12,10 @@
     "appointments:list": "node scripts/appointments-cli.js list",
     "appointments:update": "node scripts/appointments-cli.js update-status",
     "appointments:cancel": "node scripts/appointments-cli.js cancel",
-    "appointments:delete": "node scripts/appointments-cli.js delete"
+    "appointments:delete": "node scripts/appointments-cli.js delete",
+    "users:create:employee": "node scripts/users-cli.js create-employee",
+    "users:create:admin": "node scripts/users-cli.js create-admin",
+    "users:promote": "node scripts/users-cli.js promote"
   },
   "dependencies": {
     "express": "^4.18.2",

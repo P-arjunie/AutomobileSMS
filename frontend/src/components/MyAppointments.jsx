@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { appointmentsAPI } from '../utils/api';
 import toast from 'react-hot-toast';
+import { useAuth } from '../contexts/AuthContext';
 
 const StatusBadge = ({ status }) => {
   const map = {
@@ -16,9 +17,14 @@ const StatusBadge = ({ status }) => {
 };
 
 export default function MyAppointments() {
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({ status: '', startDate: '', endDate: '' });
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(6);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [showModify, setShowModify] = useState(false);
   const [modifyTargetId, setModifyTargetId] = useState(null);
   const [modifyReason, setModifyReason] = useState('');
@@ -27,12 +33,14 @@ export default function MyAppointments() {
   const load = async () => {
     try {
       setLoading(true);
-      const params = {};
+      const params = { page, limit: pageSize };
       if (filters.status) params.status = filters.status;
       if (filters.startDate) params.startDate = filters.startDate;
       if (filters.endDate) params.endDate = filters.endDate;
       const { data } = await appointmentsAPI.getAll(params);
       setItems(data.appointments || []);
+      setTotalPages(data.totalPages || 1);
+      setTotal(data.total ?? data.count ?? (data.appointments?.length || 0));
     } catch (e) {
       console.error(e);
       toast.error('Failed to load appointments');
@@ -41,7 +49,7 @@ export default function MyAppointments() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [page]);
 
   const cancel = async (id) => {
     try {
@@ -91,12 +99,14 @@ export default function MyAppointments() {
     <div className="max-w-6xl mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-primary-dark">My Appointments</h1>
+          <h1 className="text-2xl font-bold text-primary-dark">{user?.role === 'admin' ? 'All Appointments' : user?.role === 'employee' ? 'My Assigned Appointments' : 'My Appointments'}</h1>
           <p className="text-sm text-gray-600">View, filter, and manage your service bookings.</p>
         </div>
         <div className="flex gap-2">
           <button onClick={load} className="border border-gray-300 px-3 py-2 rounded-lg text-sm hover:bg-gray-50">Refresh</button>
-          <Link to="/appointments/book" className="bg-primary-blue text-white px-3 py-2 rounded-lg text-sm hover:bg-primary-purple">Book Appointment</Link>
+          {user?.role === 'customer' && (
+            <Link to="/appointments/book" className="bg-primary-blue text-white px-3 py-2 rounded-lg text-sm hover:bg-primary-purple">Book Appointment</Link>
+          )}
         </div>
       </div>
 
@@ -114,8 +124,8 @@ export default function MyAppointments() {
           <input type="date" value={filters.startDate} onChange={e => setFilters({ ...filters, startDate: e.target.value })} className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple" />
           <input type="date" value={filters.endDate} onChange={e => setFilters({ ...filters, endDate: e.target.value })} className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-purple" />
           <div className="md:col-span-2 flex gap-2">
-            <button onClick={load} className="bg-primary-blue text-white rounded-lg px-4 py-2 hover:bg-primary-purple">Apply Filters</button>
-            <button onClick={() => { setFilters({ status: '', startDate: '', endDate: '' }); load(); }} className="border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50">Reset</button>
+            <button onClick={() => { setPage(1); load(); }} className="bg-primary-blue text-white rounded-lg px-4 py-2 hover:bg-primary-purple">Apply Filters</button>
+            <button onClick={() => { setFilters({ status: '', startDate: '', endDate: '' }); setPage(1); load(); }} className="border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50">Reset</button>
           </div>
         </div>
       </div>
@@ -150,6 +160,29 @@ export default function MyAppointments() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {total > 0 && (
+        <div className="flex items-center justify-between mt-6">
+          <div className="text-sm text-gray-600">Page {page} of {totalPages} • Total {total}</div>
+          <div className="flex gap-2">
+            <button
+              className="px-3 py-2 rounded-lg border border-gray-300 disabled:opacity-50"
+              onClick={() => setPage(p => Math.max(p - 1, 1))}
+              disabled={page <= 1}
+            >
+              Previous
+            </button>
+            <button
+              className="px-3 py-2 rounded-lg border border-gray-300 disabled:opacity-50"
+              onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+              disabled={page >= totalPages}
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
 

@@ -119,14 +119,27 @@ router.get('/', async (req, res) => {
       query.assignedEmployee = req.user._id;
     }
 
+    // Pagination
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 10, 1), 100);
+    const skip = (page - 1) * limit;
+
+    const total = await Appointment.countDocuments(query);
+
     const appointments = await Appointment.find(query)
       .populate('customer', 'firstName lastName email phone')
       .populate('assignedEmployee', 'firstName lastName employeeId department')
-      .sort({ scheduledDate: 1 });
+      .sort({ scheduledDate: 1 })
+      .skip(skip)
+      .limit(limit);
 
     res.json({
       appointments,
-      count: appointments.length
+      count: appointments.length,
+      total,
+      page,
+      pageSize: limit,
+      totalPages: Math.max(Math.ceil(total / limit), 1)
     });
 
   } catch (error) {
