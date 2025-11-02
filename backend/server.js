@@ -18,6 +18,7 @@ import timeLogRoutes from './routes/timeLogs.js';
 import employeeWorkRoutes from './routes/employeeWork.js';
 import { authenticateToken } from './middleware/auth.js';
 import { setupSocketHandlers } from './socket/socketHandlers.js';
+import debugRoutes from './routes/debug.js';
 
 // Load environment variables
 dotenv.config();
@@ -84,6 +85,8 @@ app.use('/api/employees', authenticateToken, employeeWorkRoutes);
 app.use('/api/employees', authenticateToken, employeeRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);
+// Dev-only debug routes
+app.use('/api/debug', debugRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

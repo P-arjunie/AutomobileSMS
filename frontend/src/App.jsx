@@ -19,6 +19,9 @@ import VehicleHistory from './components/VehicleHistory'
 import BookAppointment from './components/BookAppointment'
 import LoadingSpinner from './components/LoadingSpinner'
 import Profile from './components/Profile'
+import ForgotPassword from './components/ForgotPassword'
+import ResetPassword from './components/ResetPassword'
+import VerifyEmail from './components/VerifyEmail'
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -115,6 +118,7 @@ function AppContent() {
               <Profile />
             </ProtectedRoute>
           } />
+
           <Route path="/vehicles" element={
             <ProtectedRoute>
               <MyVehicles />
@@ -130,6 +134,11 @@ function AppContent() {
               <BookAppointment />
             </ProtectedRoute>
           } />
+
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+
           <Route path="/home" element={
             <ProtectedRoute>
               <Home />
@@ -164,7 +173,7 @@ function AppContent() {
               <ReportsPage />
             </AdminRoute>
           } />
-          
+
           {/* Employee routes */}
           <Route path="/employee/dashboard" element={
             <EmployeeRoute>
