@@ -48,6 +48,10 @@ export const authAPI = {
   changePassword: (payload) => api.put('/auth/password', payload),
   refreshToken: (payload) => api.post('/auth/refresh-token', payload),
   logout: (payload) => api.post('/auth/logout', payload),
+  forgotPassword: (payload) => api.post('/auth/forgot-password', payload),
+  resetPassword: (payload) => api.post('/auth/reset-password', payload),
+  sendVerification: () => api.post('/auth/send-verification'),
+  verifyEmail: (payload) => api.post('/auth/verify-email', payload),
 };
 
 // Appointments API calls
@@ -99,6 +103,16 @@ export const employeeWorkAPI = {
   getAssignedServices: (params) => api.get('/employees/assigned-services', { params }),
   getDashboardStats: (params) => api.get('/employees/dashboard-stats', { params }),
   assignService: (serviceId, employeeId) => api.patch(`/employees/assign/${serviceId}`, { employeeId }),
+};
+
+// Vehicles API calls
+export const vehiclesAPI = {
+  getAll: (params) => api.get('/vehicles', { params }),
+  getById: (id) => api.get(`/vehicles/${id}`),
+  create: (vehicleData) => api.post('/vehicles', vehicleData),
+  update: (id, vehicleData) => api.put(`/vehicles/${id}`, vehicleData),
+  delete: (id) => api.delete(`/vehicles/${id}`),
+  getHistory: (id, params) => api.get(`/vehicles/${id}/history`, { params }),
 };
 
 // Health check

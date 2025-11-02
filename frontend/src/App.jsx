@@ -14,6 +14,9 @@ import DevModeBypass from './components/DevModeBypass'
 import EmployeeDashboard from './components/EmployeeDashboard'
 import TimeLoggingInterface from './components/TimeLoggingInterface'
 import MyWorkPage from './components/MyWorkPage'
+import MyVehicles from './components/MyVehicles'
+import VehicleHistory from './components/VehicleHistory'
+import BookAppointment from './components/BookAppointment'
 import LoadingSpinner from './components/LoadingSpinner'
 import Profile from './components/Profile'
 
@@ -112,6 +115,21 @@ function AppContent() {
               <Profile />
             </ProtectedRoute>
           } />
+          <Route path="/vehicles" element={
+            <ProtectedRoute>
+              <MyVehicles />
+            </ProtectedRoute>
+          } />
+          <Route path="/vehicles/:id/history" element={
+            <ProtectedRoute>
+              <VehicleHistory />
+            </ProtectedRoute>
+          } />
+          <Route path="/book-appointment" element={
+            <ProtectedRoute>
+              <BookAppointment />
+            </ProtectedRoute>
+          } />
           <Route path="/home" element={
             <ProtectedRoute>
               <Home />
@@ -145,6 +163,8 @@ function AppContent() {
             <AdminRoute>
               <ReportsPage />
             </AdminRoute>
+          } />
+          
           {/* Employee routes */}
           <Route path="/employee/dashboard" element={
             <EmployeeRoute>
