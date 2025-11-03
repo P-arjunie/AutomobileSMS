@@ -259,6 +259,59 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Quick Actions for Customers */}
+        {user.role === 'customer' && (
+          <div className="bg-white shadow rounded-lg p-6 mb-8">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button
+                onClick={() => navigate('/vehicles')}
+                className="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-200"
+              >
+                <div className="flex-shrink-0">
+                  <svg className="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a2 2 0 012-2h2a2 2 0 012 2v4a3 3 0 01-3 3z" />
+                  </svg>
+                </div>
+                <div className="ml-4 text-left">
+                  <div className="text-sm font-medium text-gray-900">My Vehicles</div>
+                  <div className="text-sm text-gray-500">Manage your registered vehicles</div>
+                </div>
+              </button>
+              
+              <button
+                onClick={() => navigate('/book-appointment')}
+                className="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-200"
+              >
+                <div className="flex-shrink-0">
+                  <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="ml-4 text-left">
+                  <div className="text-sm font-medium text-gray-900">Book Service</div>
+                  <div className="text-sm text-gray-500">Schedule a service appointment</div>
+                </div>
+              </button>
+              
+              <button
+                onClick={() => navigate('/profile')}
+                className="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-200"
+              >
+                <div className="flex-shrink-0">
+                  <svg className="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div className="ml-4 text-left">
+                  <div className="text-sm font-medium text-gray-900">My Profile</div>
+                  <div className="text-sm text-gray-500">Update your account information</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Recent Appointments */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
