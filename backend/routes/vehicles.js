@@ -300,7 +300,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/vehicles/:id - Remove vehicle (soft delete)
+// DELETE /api/vehicles/:id - Permanently delete vehicle from database
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -314,7 +314,7 @@ router.delete('/:id', async (req, res) => {
 
     const vehicle = await Vehicle.findById(id);
 
-    if (!vehicle || !vehicle.isActive) {
+    if (!vehicle) {
       return res.status(404).json({
         success: false,
         message: 'Vehicle not found'
@@ -342,20 +342,29 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
-    // Soft delete the vehicle
-    vehicle.isActive = false;
-    await vehicle.save();
+    // Permanently delete the vehicle from database
+    const deletedVehicle = await Vehicle.findByIdAndDelete(id);
+
+    if (!deletedVehicle) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to delete vehicle. Vehicle not found.'
+      });
+    }
+
+    console.log(`Vehicle ${id} permanently deleted from database.`);
 
     res.json({
       success: true,
-      message: 'Vehicle deleted successfully'
+      message: 'Vehicle deleted successfully',
+      data: { id: deletedVehicle._id }
     });
   } catch (error) {
     console.error('Error deleting vehicle:', error);
     res.status(500).json({
       success: false,
       message: 'Error deleting vehicle',
-      error: error.message
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
 });
