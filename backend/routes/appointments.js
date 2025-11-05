@@ -1,6 +1,8 @@
 import express from 'express';
 import Appointment from '../models/Appointment.js';
+import ServiceType from '../models/ServiceType.js';
 import { authorize } from '../middleware/auth.js';
+import { sendMail, renderAppointmentEmail } from '../utils/mailer.js';
 
 const router = express.Router();
 
@@ -19,22 +21,18 @@ router.get('/available-slots', async (req, res) => {
     const BUSINESS_START_HOUR = 9; // 9 AM
     const BUSINESS_END_HOUR = 17; // 5 PM
 
-    // Map service types to default estimated durations (in hours)
-    const TYPE_DURATION_HOURS = {
-      'oil-change': 1,
-      'brake-service': 2,
-      'tire-rotation': 1,
-      'engine-diagnostic': 2,
-      'transmission-service': 3,
-      'air-conditioning': 2,
-      'battery-service': 1,
-      'general-inspection': 1,
-      'bodywork': 4,
-      'painting': 4,
-      'other': 2
-    };
-
-    const estDurationHours = TYPE_DURATION_HOURS[serviceType] || 2;
+    // Determine estimated duration based on selected service type from DB
+    let estDurationHours = 2; // default fallback
+    if (serviceType) {
+      try {
+        const st = await ServiceType.findOne({ slug: serviceType, active: true }).lean();
+        if (st && typeof st.estimatedDuration === 'number' && st.estimatedDuration > 0) {
+          estDurationHours = st.estimatedDuration;
+        }
+      } catch (e) {
+        // Non-fatal; keep default duration
+      }
+    }
 
     const dayStart = new Date(`${date}T00:00:00.000Z`);
     const dayEnd = new Date(`${date}T23:59:59.999Z`);
@@ -225,6 +223,15 @@ router.post('/', async (req, res) => {
       return res.status(409).json({ message: 'Selected time slot is no longer available' });
     }
 
+    // Validate service type against DB
+    const st = await ServiceType.findOne({ slug: appointmentData.serviceType, active: true });
+    if (!st) {
+      return res.status(400).json({ message: 'Invalid service type' });
+    }
+    // Default duration/cost from service type if not provided
+    if (!appointmentData.estimatedDuration) appointmentData.estimatedDuration = st.estimatedDuration;
+    if (appointmentData.estimatedCost === undefined) appointmentData.estimatedCost = st.basePrice;
+
     const appointment = new Appointment(appointmentData);
     await appointment.save();
 
@@ -235,6 +242,20 @@ router.post('/', async (req, res) => {
       appointment,
       message: `New appointment created by ${req.user.firstName} ${req.user.lastName}`
     });
+
+    // Send email confirmation (best-effort)
+    try {
+      const to = appointment.customer?.email;
+      if (to) {
+        await sendMail({
+          to,
+          subject: 'Appointment Booked',
+          html: renderAppointmentEmail({ title: 'Your appointment is booked', appointment })
+        });
+      }
+    } catch (e) {
+      // log already done in sendMail
+    }
 
     res.status(201).json({
       message: 'Appointment created successfully',
@@ -304,6 +325,18 @@ router.patch('/:id/status', authorize('employee', 'admin'), async (req, res) => 
       appointment,
       updatedBy: req.user
     });
+
+    // Email notification (best-effort)
+    try {
+      const to = appointment.customer?.email;
+      if (to) {
+        await sendMail({
+          to,
+          subject: `Appointment ${status}`,
+          html: renderAppointmentEmail({ title: `Your appointment status is now ${status}`, appointment })
+        });
+      }
+    } catch (e) {}
 
     res.json({
       message: 'Appointment status updated successfully',
@@ -401,6 +434,18 @@ router.post('/:id/modification-request', authorize('customer'), async (req, res)
       newScheduledDate
     });
 
+    // Email notification to customer confirming request (best-effort)
+    try {
+      const to = req.user?.email;
+      if (to) {
+        await sendMail({
+          to,
+          subject: 'Modification request received',
+          html: `<div style="font-family: Arial, sans-serif;">Your modification request has been received.${newScheduledDate ? ` Preferred new date: <strong>${new Date(newScheduledDate).toLocaleString()}</strong>.` : ''}</div>`
+        });
+      }
+    } catch (e) {}
+
     res.json({
       message: 'Modification request submitted successfully'
     });
@@ -497,6 +542,18 @@ router.patch('/:id/cancel', async (req, res) => {
       appointment,
       cancelledBy: req.user
     });
+
+    // Email notification
+    try {
+      const to = appointment.customer?.email;
+      if (to) {
+        await sendMail({
+          to,
+          subject: 'Appointment cancelled',
+          html: renderAppointmentEmail({ title: 'Your appointment was cancelled', appointment })
+        });
+      }
+    } catch (e) {}
 
     return res.json({ message: 'Appointment cancelled successfully', appointment });
   } catch (error) {

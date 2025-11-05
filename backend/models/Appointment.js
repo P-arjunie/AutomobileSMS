@@ -42,19 +42,7 @@ const appointmentSchema = new mongoose.Schema({
   serviceType: {
     type: String,
     required: [true, 'Service type is required'],
-    enum: [
-      'oil-change',
-      'brake-service',
-      'tire-rotation',
-      'engine-diagnostic',
-      'transmission-service',
-      'air-conditioning',
-      'battery-service',
-      'general-inspection',
-      'bodywork',
-      'painting',
-      'other'
-    ]
+    trim: true,
   },
   description: {
     type: String,

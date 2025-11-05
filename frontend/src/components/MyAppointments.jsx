@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { appointmentsAPI } from '../utils/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
+import socketService from '../utils/socket';
 
 const StatusBadge = ({ status }) => {
   const map = {
@@ -50,6 +51,43 @@ export default function MyAppointments() {
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [page]);
+
+  // Socket: auto-refresh and notify on relevant appointment events
+  useEffect(() => {
+    const onStatus = (payload) => {
+      const appt = payload?.appointment;
+      const custId = appt?.customer?._id || appt?.customer?.id;
+      if (custId && user?.id && custId.toString() === user.id.toString()) {
+        toast(`${(appt.serviceType || '').replace(/-/g, ' ')} is now ${payload.newStatus}`, { icon: '🔔' });
+        load();
+      }
+    };
+
+    const onAssigned = (payload) => {
+      const appt = payload?.appointment;
+      const custId = appt?.customer?._id || appt?.customer?.id;
+      if (custId && user?.id && custId.toString() === user.id.toString()) {
+        toast('Your appointment has been assigned to a technician', { icon: '👨‍🔧' });
+        load();
+      }
+    };
+
+    const onModRequest = (payload) => {
+      // If current user is the one who requested, they already saw a toast from UI; skip.
+      // Keep handler for completeness.
+    };
+
+    socketService.onAppointmentStatusChanged(onStatus);
+    socketService.onAppointmentAssigned(onAssigned);
+    socketService.onModificationRequest(onModRequest);
+
+    return () => {
+      socketService.off('appointment-status-changed', onStatus);
+      socketService.off('appointment-assigned', onAssigned);
+      socketService.off('modification-request', onModRequest);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const cancel = async (id) => {
     try {

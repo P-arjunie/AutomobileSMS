@@ -157,6 +157,13 @@ mongod
 npm run dev
 ```
 
+6. **Seed default service types (first run)**
+```bash
+npm run seed:service-types
+```
+This populates the database with common service types used by the booking flow. You can manage types later via the database.
+```
+
 #### Frontend Setup
 
 1. **Navigate to frontend directory**

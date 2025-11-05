@@ -73,10 +73,8 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for better performance
-userSchema.index({ email: 1 });
+// Indexes (avoid duplicating unique indexes)
 userSchema.index({ role: 1 });
-userSchema.index({ employeeId: 1 });
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {
