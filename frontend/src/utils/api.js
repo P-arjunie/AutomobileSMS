@@ -108,6 +108,16 @@ export const employeeWorkAPI = {
   assignService: (serviceId, employeeId) => api.patch(`/employees/assign/${serviceId}`, { employeeId }),
 };
 
+// Vehicles API calls
+export const vehiclesAPI = {
+  getAll: (params) => api.get('/vehicles', { params }),
+  getById: (id) => api.get(`/vehicles/${id}`),
+  create: (vehicleData) => api.post('/vehicles', vehicleData),
+  update: (id, vehicleData) => api.put(`/vehicles/${id}`, vehicleData),
+  delete: (id) => api.delete(`/vehicles/${id}`),
+  getHistory: (id, params) => api.get(`/vehicles/${id}/history`, { params }),
+};
+
 // Health check
 export const healthAPI = {
   check: () => api.get('/health'),
