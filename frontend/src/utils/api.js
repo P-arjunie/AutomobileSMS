@@ -48,6 +48,10 @@ export const authAPI = {
   changePassword: (payload) => api.put('/auth/password', payload),
   refreshToken: (payload) => api.post('/auth/refresh-token', payload),
   logout: (payload) => api.post('/auth/logout', payload),
+  forgotPassword: (payload) => api.post('/auth/forgot-password', payload),
+  resetPassword: (payload) => api.post('/auth/reset-password', payload),
+  sendVerification: () => api.post('/auth/send-verification'),
+  verifyEmail: (payload) => api.post('/auth/verify-email', payload),
 };
 
 // Appointments API calls
@@ -91,11 +95,72 @@ export const vehiclesAPI = {
   create: (data) => api.post('/vehicles', data),
   update: (id, data) => api.put(`/vehicles/${id}`, data),
   remove: (id) => api.delete(`/vehicles/${id}`),
+// Time Logs API calls
+export const timeLogsAPI = {
+  getAll: (params) => api.get('/time-logs', { params }),
+  getById: (id) => api.get(`/time-logs/${id}`),
+  create: (timeLogData) => api.post('/time-logs', timeLogData),
+  update: (id, timeLogData) => api.put(`/time-logs/${id}`, timeLogData),
+  delete: (id) => api.delete(`/time-logs/${id}`),
+  start: (serviceProjectId, description) => api.post('/time-logs/start', { serviceProjectId, description }),
+  stop: (description) => api.post('/time-logs/stop', { description }),
+  getSummary: (params) => api.get('/time-logs/summary', { params }),
+};
+
+// Employee Work API calls
+export const employeeWorkAPI = {
+  getAssignedServices: (params) => api.get('/employees/assigned-services', { params }),
+  getDashboardStats: (params) => api.get('/employees/dashboard-stats', { params }),
+  assignService: (serviceId, employeeId) => api.patch(`/employees/assign/${serviceId}`, { employeeId }),
+};
+
+// Vehicles API calls
+export const vehiclesAPI = {
+  getAll: (params) => api.get('/vehicles', { params }),
+  getById: (id) => api.get(`/vehicles/${id}`),
+  create: (vehicleData) => api.post('/vehicles', vehicleData),
+  update: (id, vehicleData) => api.put(`/vehicles/${id}`, vehicleData),
+  delete: (id) => api.delete(`/vehicles/${id}`),
+  getHistory: (id, params) => api.get(`/vehicles/${id}/history`, { params }),
 };
 
 // Health check
 export const healthAPI = {
   check: () => api.get('/health'),
+};
+
+// Admin API calls
+export const adminAPI = {
+  // Dashboard stats
+  getDashboardStats: () => api.get('/admin/dashboard-stats'),
+  
+  // Appointments
+  getAllAppointments: (params) => api.get('/admin/appointments', { params }),
+  
+  // Services
+  getAllServices: (params) => api.get('/admin/services', { params }),
+  
+  // Employees
+  getEmployeePerformance: (params) => api.get('/admin/employees/performance', { params }),
+  
+  // Customers
+  getAllCustomers: (params) => api.get('/admin/customers', { params }),
+  
+  // Reports
+  getServiceReports: (params) => api.get('/admin/reports/services', { params }),
+  getAppointmentReports: (params) => api.get('/admin/reports/appointments', { params }),
+};
+
+// Reports API calls
+export const reportsAPI = {
+  generate: (reportData) => api.post('/reports/generate', reportData),
+  export: (params) => api.get('/reports/export', { 
+    params,
+    responseType: 'blob' // Important for file downloads
+  }),
+  getAll: (params) => api.get('/reports', { params }),
+  getById: (id) => api.get(`/reports/${id}`),
+  delete: (id) => api.delete(`/reports/${id}`),
 };
 
 export default api;
