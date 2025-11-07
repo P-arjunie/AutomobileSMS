@@ -16,6 +16,7 @@ import adminRoutes from './routes/admin.js';
 import reportRoutes from './routes/reports.js';
 import timeLogRoutes from './routes/timeLogs.js';
 import employeeWorkRoutes from './routes/employeeWork.js';
+import modificationRequestsRoutes from './routes/modificationRequests.js';
 import { authenticateToken } from './middleware/auth.js';
 import { setupSocketHandlers } from './socket/socketHandlers.js';
 import debugRoutes from './routes/debug.js';
@@ -85,6 +86,7 @@ app.use('/api/employees', authenticateToken, employeeWorkRoutes);
 app.use('/api/employees', authenticateToken, employeeRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/modification-requests', authenticateToken, modificationRequestsRoutes);
 // Dev-only debug routes
 app.use('/api/debug', debugRoutes);
 

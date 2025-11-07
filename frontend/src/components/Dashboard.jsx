@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import Header from './Header'
+// Header is now provided by App layout
 import socketService from '../utils/socket'
 import { appointmentsAPI, servicesAPI } from '../utils/api'
 import toast from 'react-hot-toast'
@@ -119,7 +119,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
       
       {/* Admin Navigation Bar */}
       {user.role === 'admin' && (

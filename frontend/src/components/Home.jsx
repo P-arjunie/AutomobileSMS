@@ -1,10 +1,10 @@
 import React from 'react'
-import Header from './Header'
+// Header is provided by App layout (role-aware)
 
 const Home = ({ onLogout }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-light via-primary-blue/20 to-primary-purple/30">
-      <Header />
+  {/* header provided by App layout */}
 
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

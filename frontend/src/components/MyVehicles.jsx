@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrashIcon, PencilIcon, EyeIcon, PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import Header from './Header';
+// Header is provided by App layout (role-aware)
 import LoadingSpinner from './LoadingSpinner';
 import VehicleForm from './VehicleForm';
 import { vehiclesAPI } from '../utils/api';
@@ -112,7 +112,7 @@ const MyVehicles = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      {/* header provided by App layout */}
       
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Page Header */}

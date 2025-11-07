@@ -1,8 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 
-const Header = () => {
+const HeaderAdmin = () => {
   const { user, logout } = useAuth()
 
   const handleLogout = async () => {
@@ -18,19 +18,10 @@ const Header = () => {
               <h1 className="text-2xl font-bold text-primary-blue">Automobile SMS</h1>
             </div>
             <nav className="ml-6 space-x-4">
-              <Link to="/dashboard" className="text-sm text-gray-700 hover:text-primary-blue">Dashboard</Link>
-              {(user?.role === 'employee' || user?.role === 'admin') && (
-                <Link to="/employee/modification-requests" className="text-sm text-gray-700 hover:text-primary-blue">Modification Requests</Link>
-              )}
-              {user?.role === 'admin' && (
-                <Link to="/admin/reports" className="text-sm text-gray-700 hover:text-primary-blue">Reports</Link>
-              )}
-              {user?.role === 'customer' && (
-                <>
-                  <Link to="/vehicles" className="text-sm text-gray-700 hover:text-primary-blue">My Vehicles</Link>
-                  <Link to="/book-appointment" className="text-sm text-gray-700 hover:text-primary-blue">Book Service</Link>
-                </>
-              )}
+              <Link to="/admin/dashboard" className="text-sm text-gray-700 hover:text-primary-blue">Admin Dashboard</Link>
+              <Link to="/admin/appointments" className="text-sm text-gray-700 hover:text-primary-blue">All Appointments</Link>
+              <Link to="/admin/services" className="text-sm text-gray-700 hover:text-primary-blue">All Services</Link>
+              <Link to="/admin/reports" className="text-sm text-gray-700 hover:text-primary-blue">Reports</Link>
               <Link to="/home" className="text-sm text-gray-700 hover:text-primary-blue">Home</Link>
             </nav>
           </div>
@@ -38,9 +29,7 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             <div className="text-sm text-gray-700">
               Welcome, <span className="font-medium">{user?.firstName} {user?.lastName}</span>
-              <span className="ml-2 px-2 py-1 bg-primary-blue/10 text-primary-blue rounded-full text-xs">
-                {user?.role}
-              </span>
+              <span className="ml-2 px-2 py-1 bg-primary-blue/10 text-primary-blue rounded-full text-xs">{user?.role}</span>
             </div>
 
             {user?.avatar ? (
@@ -64,4 +53,4 @@ const Header = () => {
   )
 }
 
-export default Header
+export default HeaderAdmin

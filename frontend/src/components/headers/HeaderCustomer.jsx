@@ -1,8 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 
-const Header = () => {
+const HeaderCustomer = () => {
   const { user, logout } = useAuth()
 
   const handleLogout = async () => {
@@ -19,18 +19,8 @@ const Header = () => {
             </div>
             <nav className="ml-6 space-x-4">
               <Link to="/dashboard" className="text-sm text-gray-700 hover:text-primary-blue">Dashboard</Link>
-              {(user?.role === 'employee' || user?.role === 'admin') && (
-                <Link to="/employee/modification-requests" className="text-sm text-gray-700 hover:text-primary-blue">Modification Requests</Link>
-              )}
-              {user?.role === 'admin' && (
-                <Link to="/admin/reports" className="text-sm text-gray-700 hover:text-primary-blue">Reports</Link>
-              )}
-              {user?.role === 'customer' && (
-                <>
-                  <Link to="/vehicles" className="text-sm text-gray-700 hover:text-primary-blue">My Vehicles</Link>
-                  <Link to="/book-appointment" className="text-sm text-gray-700 hover:text-primary-blue">Book Service</Link>
-                </>
-              )}
+              <Link to="/vehicles" className="text-sm text-gray-700 hover:text-primary-blue">My Vehicles</Link>
+              <Link to="/book-appointment" className="text-sm text-gray-700 hover:text-primary-blue">Book Service</Link>
               <Link to="/home" className="text-sm text-gray-700 hover:text-primary-blue">Home</Link>
             </nav>
           </div>
@@ -64,4 +54,4 @@ const Header = () => {
   )
 }
 
-export default Header
+export default HeaderCustomer

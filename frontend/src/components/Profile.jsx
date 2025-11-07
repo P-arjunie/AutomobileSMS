@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { authAPI } from '../utils/api'
 import toast from 'react-hot-toast'
-import Header from './Header'
+// Header is provided by App layout (role-aware)
 
 const Profile = () => {
   const navigate = useNavigate()
@@ -112,7 +112,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      {/* header provided by App layout */}
 
       <div className="max-w-3xl mx-auto py-10 px-4">
         <h2 className="text-2xl font-bold mb-6">Profile</h2>

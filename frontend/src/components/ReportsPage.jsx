@@ -81,22 +81,21 @@ const ReportsPage = () => {
           filters
         })
       };
-
       const response = await reportsAPI.export(params);
-      
+
       // Create blob and download
-      const blob = new Blob([response.data], { 
-        type: format === 'csv' ? 'text/csv' : 'application/json' 
-      });
+      const mime = format === 'csv' ? 'text/csv' : (format === 'pdf' ? 'application/pdf' : 'application/json');
+      const ext = format === 'pdf' ? 'pdf' : (format === 'csv' ? 'csv' : 'json');
+      const blob = new Blob([response.data], { type: mime });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `report-${Date.now()}.${format}`;
+      link.download = `report-${Date.now()}.${ext}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
+
       toast.success(`Report exported as ${format.toUpperCase()}`);
     } catch (error) {
       console.error('Export error:', error);
@@ -428,6 +427,12 @@ const ReportsPage = () => {
                       Export as CSV
                     </button>
                     <button
+                      onClick={() => handleExportReport('pdf')}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200"
+                    >
+                      Export as PDF
+                    </button>
+                    <button
                       onClick={() => handleExportReport('json')}
                       className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200"
                     >
@@ -461,6 +466,13 @@ const ReportsPage = () => {
                           title="Export CSV"
                         >
                           CSV
+                        </button>
+                        <button
+                          onClick={() => handleExportReport('pdf', report._id)}
+                          className="text-xs text-indigo-600 hover:text-indigo-700 ml-2"
+                          title="Export PDF"
+                        >
+                          PDF
                         </button>
                         <button
                           onClick={() => handleDeleteReport(report._id)}

@@ -10,8 +10,7 @@ const timeLogSchema = new mongoose.Schema({
   serviceProject: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Appointment',
-    required: [true, 'Service project is required'],
-    index: true
+    required: [true, 'Service project is required']
   },
   startTime: {
     type: Date,

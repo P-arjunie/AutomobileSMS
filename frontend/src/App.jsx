@@ -14,6 +14,7 @@ import DevModeBypass from './components/DevModeBypass'
 import EmployeeDashboard from './components/EmployeeDashboard'
 import TimeLoggingInterface from './components/TimeLoggingInterface'
 import MyWorkPage from './components/MyWorkPage'
+import ModificationRequests from './components/ModificationRequests'
 import MyVehicles from './components/MyVehicles'
 import VehicleHistory from './components/VehicleHistory'
 import BookAppointment from './components/BookAppointment'
@@ -23,6 +24,9 @@ import ForgotPassword from './components/ForgotPassword'
 import ResetPassword from './components/ResetPassword'
 import VerifyEmail from './components/VerifyEmail'
 import MyAppointments from './components/MyAppointments'
+import HeaderCustomer from './components/headers/HeaderCustomer'
+import HeaderEmployee from './components/headers/HeaderEmployee'
+import HeaderAdmin from './components/headers/HeaderAdmin'
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -111,9 +115,16 @@ const AdminRoute = ({ children }) => {
 }
 
 function AppContent() {
+  const { user, isAuthenticated, isLoading } = useAuth()
+
   return (
     <Router>
       <div className="App">
+        {/* Role-aware shared header: only shown when authenticated */}
+        {!isLoading && isAuthenticated && (
+          user?.role === 'admin' ? <HeaderAdmin /> : (user?.role === 'employee' ? <HeaderEmployee /> : <HeaderCustomer />)
+        )}
+
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={
@@ -219,6 +230,11 @@ function AppContent() {
           <Route path="/employee/my-work" element={
             <EmployeeRoute>
               <MyWorkPage />
+            </EmployeeRoute>
+          } />
+          <Route path="/employee/modification-requests" element={
+            <EmployeeRoute>
+              <ModificationRequests />
             </EmployeeRoute>
           } />
           

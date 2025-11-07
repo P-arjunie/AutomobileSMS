@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon, CalendarIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import Header from './Header';
+// Header is provided by App layout (role-aware)
 import LoadingSpinner from './LoadingSpinner';
 import { vehiclesAPI } from '../utils/api';
 
@@ -118,7 +118,7 @@ const VehicleHistory = () => {
   if (!vehicle) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
+        {/* header provided by App layout */}
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900">Vehicle not found</h2>
@@ -136,7 +136,7 @@ const VehicleHistory = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      {/* header provided by App layout */}
       
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Navigation */}

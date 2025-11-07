@@ -111,9 +111,16 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const loadUser = () => {
       try {
-        const token = localStorage.getItem('token');
-        const user = localStorage.getItem('user');
-        const refreshToken = localStorage.getItem('refreshToken');
+        // Support both localStorage (remember me) and sessionStorage (session-only)
+        let token = localStorage.getItem('token');
+        let user = localStorage.getItem('user');
+        let refreshToken = localStorage.getItem('refreshToken');
+
+        if (!token) {
+          token = sessionStorage.getItem('token');
+          user = sessionStorage.getItem('user');
+          refreshToken = sessionStorage.getItem('refreshToken');
+        }
 
         if (token && user) {
           dispatch({
@@ -147,10 +154,17 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.login(credentials);
       const { token, user, refreshToken } = response.data;
 
-      // Store in localStorage
-      localStorage.setItem('token', token);
-      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify(user));
+      // Store according to rememberMe flag. Default: remember
+      const remember = credentials?.rememberMe !== undefined ? Boolean(credentials.rememberMe) : true;
+      if (remember) {
+        localStorage.setItem('token', token);
+        if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('user', JSON.stringify(user));
+      } else {
+        sessionStorage.setItem('token', token);
+        if (refreshToken) sessionStorage.setItem('refreshToken', refreshToken);
+        sessionStorage.setItem('user', JSON.stringify(user));
+      }
 
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
@@ -183,10 +197,10 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.register(userData);
       const { token, user, refreshToken } = response.data;
 
-      // Store in localStorage
-      localStorage.setItem('token', token);
-      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify(user));
+  // By default registration uses persistent storage (localStorage)
+  localStorage.setItem('token', token);
+  if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+  localStorage.setItem('user', JSON.stringify(user));
 
       dispatch({
         type: AUTH_ACTIONS.REGISTER_SUCCESS,
@@ -219,10 +233,13 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      // Clear localStorage
+      // Clear both localStorage and sessionStorage
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('refreshToken');
+      sessionStorage.removeItem('user');
 
       // Disconnect socket
       socketService.disconnect();

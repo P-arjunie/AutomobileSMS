@@ -141,6 +141,24 @@ export default function MyAppointments() {
                   <div className="text-sm text-gray-700 mt-1">{a.vehicle.make} {a.vehicle.model} • {a.vehicle.year} • {a.vehicle.licensePlate}</div>
                 )}
                 {a.description && <div className="text-sm text-gray-600 mt-2">{a.description}</div>}
+
+                {/* Modification requests history */}
+                {a.modificationRequests && a.modificationRequests.length > 0 && (
+                  <div className="mt-3 text-sm">
+                    <div className="font-medium text-gray-700 mb-1">Modification Requests</div>
+                    <ul className="space-y-2">
+                      {a.modificationRequests.map((mr) => (
+                        <li key={mr._id} className="p-2 border rounded bg-gray-50">
+                          <div className="text-xs text-gray-500">Requested at: {new Date(mr.requestedAt).toLocaleString()}</div>
+                          <div className="text-sm">Reason: {mr.reason}</div>
+                          {mr.newScheduledDate && <div className="text-sm">New Date: {new Date(mr.newScheduledDate).toLocaleString()}</div>}
+                          <div className="text-sm">Status: <strong className="capitalize">{mr.status}</strong></div>
+                          {mr.respondedAt && <div className="text-xs text-gray-500">Responded at: {new Date(mr.respondedAt).toLocaleString()}</div>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 {canCancel(a.status) && (

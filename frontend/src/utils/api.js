@@ -13,7 +13,8 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    // Support token in localStorage (remember me) or sessionStorage (temporary session)
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -155,6 +156,13 @@ export const reportsAPI = {
   getAll: (params) => api.get('/reports', { params }),
   getById: (id) => api.get(`/reports/${id}`),
   delete: (id) => api.delete(`/reports/${id}`),
+};
+
+// Modification requests API
+export const modificationRequestsAPI = {
+  getAll: (params) => api.get('/modification-requests', { params }),
+  approve: (id) => api.patch(`/modification-requests/${id}/approve`),
+  reject: (id, body) => api.patch(`/modification-requests/${id}/reject`, body),
 };
 
 export default api;

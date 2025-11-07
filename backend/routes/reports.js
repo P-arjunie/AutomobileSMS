@@ -4,6 +4,7 @@ import ServiceLog from '../models/ServiceLog.js';
 import User from '../models/User.js';
 import Report from '../models/Report.js';
 import { authenticateToken, authorize } from '../middleware/auth.js';
+import PDFDocument from 'pdfkit';
 
 const router = express.Router();
 
@@ -414,10 +415,95 @@ router.get('/export', async (req, res) => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('Content-Disposition', `attachment; filename=report-${Date.now()}.json`);
       return res.json(reportData);
+    } else if (exportFormat === 'pdf') {
+      // Generate a simple PDF using pdfkit
+      const doc = new PDFDocument({ autoFirstPage: true, margin: 40 });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=report-${Date.now()}.pdf`);
+
+      // Pipe PDF stream to response
+      doc.pipe(res);
+
+      // Header
+      doc.fontSize(18).text('Automobile SMS - Report', { align: 'center' });
+      doc.moveDown(0.5);
+
+      // Report meta
+      try {
+        const start = (dateRange && dateRange.startDate) ? new Date(dateRange.startDate).toLocaleDateString() : '';
+        const end = (dateRange && dateRange.endDate) ? new Date(dateRange.endDate).toLocaleDateString() : '';
+        doc.fontSize(10).fillColor('gray').text(`Type: ${reportType || ''}`, { align: 'left' });
+        doc.text(`Date Range: ${start} - ${end}`, { align: 'left' });
+        doc.moveDown(0.5);
+
+        // Render content depending on report data
+        if (reportData.appointments) {
+          doc.fontSize(12).fillColor('black').text('Appointments', { underline: true });
+          doc.moveDown(0.25);
+
+          // table header
+          doc.fontSize(9).text('Date', { continued: true, width: 90 });
+          doc.text('Customer', { continued: true, width: 140 });
+          doc.text('Vehicle', { continued: true, width: 120 });
+          doc.text('Service', { continued: true, width: 80 });
+          doc.text('Status', { continued: true, width: 80 });
+          doc.text('Cost', { width: 60 });
+          doc.moveDown(0.2);
+
+          reportData.appointments.forEach(apt => {
+            const date = apt.scheduledDate ? new Date(apt.scheduledDate).toLocaleDateString() : '';
+            const customer = `${apt.customer?.firstName || ''} ${apt.customer?.lastName || ''}`.trim();
+            const vehicle = apt.vehicle ? `${apt.vehicle.year || ''} ${apt.vehicle.make || ''} ${apt.vehicle.model || ''}` : '';
+            const serviceType = apt.serviceType || '';
+            const status = apt.status || '';
+            const cost = apt.actualCost != null ? apt.actualCost : '';
+
+            doc.fontSize(9).text(date, { continued: true, width: 90 });
+            doc.text(customer, { continued: true, width: 140 });
+            doc.text(vehicle, { continued: true, width: 120 });
+            doc.text(serviceType, { continued: true, width: 80 });
+            doc.text(status, { continued: true, width: 80 });
+            doc.text(cost.toString(), { width: 60 });
+          });
+        } else if (reportData.serviceLogs) {
+          doc.fontSize(12).fillColor('black').text('Service Logs', { underline: true });
+          doc.moveDown(0.25);
+
+          // table header
+          doc.fontSize(9).text('Start Time', { continued: true, width: 120 });
+          doc.text('Employee', { continued: true, width: 140 });
+          doc.text('Service Type', { continued: true, width: 100 });
+          doc.text('Status', { continued: true, width: 80 });
+          doc.text('Hours', { width: 60 });
+          doc.moveDown(0.2);
+
+          reportData.serviceLogs.forEach(log => {
+            const startTime = log.startTime ? new Date(log.startTime).toLocaleString() : '';
+            const employee = `${log.employee?.firstName || ''} ${log.employee?.lastName || ''}`.trim();
+            const serviceType = log.appointment?.serviceType || '';
+            const status = log.status || '';
+            const hours = log.hoursLogged != null ? log.hoursLogged : '';
+
+            doc.fontSize(9).text(startTime, { continued: true, width: 120 });
+            doc.text(employee, { continued: true, width: 140 });
+            doc.text(serviceType, { continued: true, width: 100 });
+            doc.text(status, { continued: true, width: 80 });
+            doc.text(hours.toString(), { width: 60 });
+          });
+        } else {
+          doc.fontSize(12).fillColor('black').text('No exportable data available for this report.', { align: 'left' });
+        }
+      } catch (err) {
+        console.error('PDF generation error meta:', err);
+      }
+
+      doc.end();
+      // return after piping
+      return;
     } else {
-      // For PDF, return JSON for now (PDF generation requires additional libraries)
       return res.status(400).json({ 
-        message: 'PDF export not implemented yet. Please use CSV or JSON format.' 
+        message: 'Invalid export format. Supported: csv, json, pdf' 
       });
     }
   } catch (error) {
