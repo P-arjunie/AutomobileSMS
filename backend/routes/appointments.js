@@ -4,6 +4,89 @@ import { authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Get available time slots for a given date and service type
+// Query: date=YYYY-MM-DD, serviceType=oil-change, intervalMinutes=30 (optional)
+router.get('/available-slots', async (req, res) => {
+  try {
+    const { date, serviceType, intervalMinutes } = req.query;
+
+    if (!date) {
+      return res.status(400).json({ message: 'Date is required (YYYY-MM-DD)' });
+    }
+
+    // Business hours configuration
+    const SLOT_INTERVAL = parseInt(intervalMinutes, 10) || 30; // minutes
+    const BUSINESS_START_HOUR = 9; // 9 AM
+    const BUSINESS_END_HOUR = 17; // 5 PM
+
+    // Map service types to default estimated durations (in hours)
+    const TYPE_DURATION_HOURS = {
+      'oil-change': 1,
+      'brake-service': 2,
+      'tire-rotation': 1,
+      'engine-diagnostic': 2,
+      'transmission-service': 3,
+      'air-conditioning': 2,
+      'battery-service': 1,
+      'general-inspection': 1,
+      'bodywork': 4,
+      'painting': 4,
+      'other': 2
+    };
+
+    const estDurationHours = TYPE_DURATION_HOURS[serviceType] || 2;
+
+    const dayStart = new Date(`${date}T00:00:00.000Z`);
+    const dayEnd = new Date(`${date}T23:59:59.999Z`);
+
+    // Fetch existing appointments for the day (excluding cancelled)
+    const existing = await Appointment.find({
+      scheduledDate: { $gte: dayStart, $lte: dayEnd },
+      status: { $ne: 'cancelled' }
+    }).select('scheduledDate estimatedDuration');
+
+    // Build blocked windows as [start, end) in ms
+    const blocked = existing.map(a => {
+      const start = new Date(a.scheduledDate).getTime();
+      const durHrs = a.estimatedDuration || 2;
+      const end = start + durHrs * 60 * 60 * 1000;
+      return [start, end];
+    });
+
+    // Helper to check overlap
+    const overlaps = (startMs, endMs) => {
+      return blocked.some(([bStart, bEnd]) => Math.max(bStart, startMs) < Math.min(bEnd, endMs));
+    };
+
+    // Generate candidate slots within business hours
+    const slots = [];
+    const businessStart = new Date(dayStart);
+    businessStart.setUTCHours(BUSINESS_START_HOUR, 0, 0, 0);
+    const businessEnd = new Date(dayStart);
+    businessEnd.setUTCHours(BUSINESS_END_HOUR, 0, 0, 0);
+
+    const slotMs = SLOT_INTERVAL * 60 * 1000;
+    const durationMs = estDurationHours * 60 * 60 * 1000;
+    for (let t = businessStart.getTime(); t + durationMs <= businessEnd.getTime(); t += slotMs) {
+      const end = t + durationMs;
+      if (!overlaps(t, end)) {
+        slots.push(new Date(t).toISOString());
+      }
+    }
+
+    return res.json({
+      date,
+      serviceType: serviceType || null,
+      intervalMinutes: SLOT_INTERVAL,
+      estimatedDurationHours: estDurationHours,
+      availableSlots: slots
+    });
+  } catch (error) {
+    console.error('Available slots error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Get all appointments (for employees/admin) or user's appointments (for customers)
 router.get('/', async (req, res) => {
   try {
@@ -102,6 +185,33 @@ router.post('/', async (req, res) => {
       });
     }
 
+    // Prevent double booking: check if the selected slot overlaps with existing appointments
+    const desiredStart = new Date(appointmentData.scheduledDate);
+    const durationHours = appointmentData.estimatedDuration || 2;
+    const desiredEnd = new Date(desiredStart.getTime() + durationHours * 60 * 60 * 1000);
+
+    const dayStart = new Date(desiredStart);
+    dayStart.setUTCHours(0, 0, 0, 0);
+    const dayEnd = new Date(desiredStart);
+    dayEnd.setUTCHours(23, 59, 59, 999);
+
+    const sameDayAppointments = await Appointment.find({
+      scheduledDate: { $gte: dayStart, $lte: dayEnd },
+      status: { $ne: 'cancelled' }
+    }).select('scheduledDate estimatedDuration');
+
+    const desiredStartMs = desiredStart.getTime();
+    const desiredEndMs = desiredEnd.getTime();
+    const conflict = sameDayAppointments.some(a => {
+      const start = new Date(a.scheduledDate).getTime();
+      const end = start + (a.estimatedDuration || 2) * 60 * 60 * 1000;
+      return Math.max(start, desiredStartMs) < Math.min(end, desiredEndMs);
+    });
+
+    if (conflict) {
+      return res.status(409).json({ message: 'Selected time slot is no longer available' });
+    }
+
     const appointment = new Appointment(appointmentData);
     await appointment.save();
 
@@ -174,7 +284,7 @@ router.patch('/:id/status', authorize('employee', 'admin'), async (req, res) => 
     ]);
 
     // Emit real-time update
-    req.io.emit('appointment-status-updated', {
+    req.io.emit('appointment-status-changed', {
       appointmentId: appointment._id,
       oldStatus,
       newStatus: status,
@@ -329,6 +439,56 @@ router.post('/:id/notes', async (req, res) => {
     res.status(500).json({ 
       message: 'Internal server error' 
     });
+  }
+});
+
+// Cancel appointment (customer can cancel own, admin can cancel any)
+router.patch('/:id/cancel', async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    const isOwner = appointment.customer.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    if (!['pending', 'confirmed'].includes(appointment.status)) {
+      return res.status(400).json({ message: 'Only pending or confirmed appointments can be cancelled' });
+    }
+
+    const oldStatus = appointment.status;
+    appointment.status = 'cancelled';
+    appointment.endTime = new Date();
+    appointment.notes.push({
+      text: `Appointment cancelled by ${isAdmin ? 'admin' : 'customer'}`,
+      author: req.user._id
+    });
+    await appointment.save();
+
+    await appointment.populate([
+      { path: 'customer', select: 'firstName lastName email phone' },
+      { path: 'assignedEmployee', select: 'firstName lastName employeeId department' }
+    ]);
+
+    // Emit real-time event
+    req.io.emit('appointment-status-changed', {
+      appointmentId: appointment._id,
+      oldStatus,
+      newStatus: 'cancelled',
+      appointment,
+      cancelledBy: req.user
+    });
+
+    return res.json({ message: 'Appointment cancelled successfully', appointment });
+  } catch (error) {
+    console.error('Cancel appointment error:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 

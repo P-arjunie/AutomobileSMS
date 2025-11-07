@@ -22,6 +22,8 @@ import Profile from './components/Profile'
 import ForgotPassword from './components/ForgotPassword'
 import ResetPassword from './components/ResetPassword'
 import VerifyEmail from './components/VerifyEmail'
+import BookAppointment from './components/BookAppointment'
+import MyAppointments from './components/MyAppointments'
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -50,7 +52,8 @@ const EmployeeRoute = ({ children }) => {
     return children
   }
   
-  return <Navigate to="/dashboard" replace />
+  // Redirect to appropriate dashboard based on user role
+  return <RoleBasedRedirect />
 }
 
 // Public Route component (redirect to dashboard if already authenticated)
@@ -62,13 +65,30 @@ const PublicRoute = ({ children }) => {
   }
   
   if (isAuthenticated) {
-    // Redirect to admin dashboard if admin, otherwise regular dashboard
-    return user?.role === 'admin' 
-      ? <Navigate to="/admin/dashboard" replace />
-      : <Navigate to="/dashboard" replace />
+    // Redirect based on user role
+    if (user?.role === 'admin') {
+      return <Navigate to="/admin/dashboard" replace />
+    } else if (user?.role === 'employee') {
+      return <Navigate to="/employee/dashboard" replace />
+    } else {
+      return <Navigate to="/dashboard" replace />
+    }
   }
   
   return children
+}
+
+// Role-aware redirect component
+const RoleBasedRedirect = () => {
+  const { user } = useAuth()
+  
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin/dashboard" replace />
+  } else if (user?.role === 'employee') {
+    return <Navigate to="/employee/dashboard" replace />
+  } else {
+    return <Navigate to="/dashboard" replace />
+  }
 }
 
 // Admin Route component (requires admin role)
@@ -83,11 +103,12 @@ const AdminRoute = ({ children }) => {
     return <Navigate to="/login" replace />
   }
   
-  if (user?.role !== 'admin') {
-    return <Navigate to="/dashboard" replace />
+  if (user?.role === 'admin') {
+    return children
   }
   
-  return children
+  // Redirect to appropriate dashboard based on user role
+  return <RoleBasedRedirect />
 }
 
 function AppContent() {
@@ -138,6 +159,17 @@ function AppContent() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+
+          <Route path="/appointments/book" element={
+            <ProtectedRoute>
+              <BookAppointment />
+            </ProtectedRoute>
+          } />
+          <Route path="/appointments/my" element={
+            <ProtectedRoute>
+              <MyAppointments />
+            </ProtectedRoute>
+          } />
 
           <Route path="/home" element={
             <ProtectedRoute>
@@ -192,10 +224,18 @@ function AppContent() {
           } />
           
           {/* Default redirect */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <RoleBasedRedirect />
+            </ProtectedRoute>
+          } />
           
           {/* Catch all route */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={
+            <ProtectedRoute>
+              <RoleBasedRedirect />
+            </ProtectedRoute>
+          } />
         </Routes>
         
         {/* Toast notifications */}

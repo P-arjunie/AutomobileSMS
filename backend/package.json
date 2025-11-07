@@ -9,7 +9,12 @@
     "dev": "nodemon server.js",
     "test": "jest",
     "seed": "node scripts/seedTestData.js",
-    "reset-users": "node scripts/resetTestUsers.js"
+    "reset-users": "node scripts/resetTestUsers.js",
+    "seed:appointments": "node scripts/appointments-cli.js seed",
+    "appointments:list": "node scripts/appointments-cli.js list",
+    "appointments:update": "node scripts/appointments-cli.js update-status",
+    "appointments:cancel": "node scripts/appointments-cli.js cancel",
+    "appointments:delete": "node scripts/appointments-cli.js delete"
   },
   "dependencies": {
     "express": "^4.18.2",
