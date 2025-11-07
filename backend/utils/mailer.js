@@ -1,48 +1,76 @@
-import nodemailer from 'nodemailer'
+import nodemailer from 'nodemailer';
 
-// If credentials are missing, we log emails to console instead of attempting to send.
-const hasEmailCreds = Boolean(process.env.EMAIL_USERNAME && process.env.EMAIL_PASSWORD)
+// Create a transporter using environment variables (Mailtrap or SMTP)
+const createTransporter = () => {
+  const host = process.env.SMTP_HOST;
+  const port = parseInt(process.env.SMTP_PORT || '587', 10);
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
 
-let transporter = null
-if (hasEmailCreds) {
-  transporter = nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE || 'gmail',
-    auth: {
-      user: process.env.EMAIL_USERNAME,
-      pass: process.env.EMAIL_PASSWORD
-    }
-  })
-} else {
-  console.warn('Mailer: EMAIL_USERNAME or EMAIL_PASSWORD not set. Emails will be logged to console instead of sent.')
-}
-
-export const sendEmail = async ({ to, subject, text, html }) => {
-  const mailOptions = {
-    from: process.env.EMAIL_FROM || process.env.EMAIL_USERNAME,
-    to,
-    subject,
-    text,
-    html
+  if (!host || !user || !pass) {
+    console.warn('[mailer] SMTP not configured. Emails will be skipped.');
+    return null;
   }
 
-  if (!hasEmailCreds) {
-    // Development fallback: log the email to console so flows don't crash and you can copy the link
-    console.log('--- Mailer fallback (not sent) ---')
-    console.log('To:', to)
-    console.log('Subject:', subject)
-    if (text) console.log('Text:', text)
-    if (html) console.log('HTML:', html)
-    console.log('--- End mail ---')
-    return Promise.resolve({ mocked: true })
-  }
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465, // true for 465, false for other ports
+    auth: { user, pass }
+  });
 
+  return transporter;
+};
+
+let transporter = null;
+
+export const sendMail = async ({ to, subject, html, text }) => {
   try {
-    const info = await transporter.sendMail(mailOptions)
-    return info
-  } catch (err) {
-    console.error('Failed to send email:', err)
-    throw err
-  }
-}
+    if (!transporter) {
+      transporter = createTransporter();
+    }
+    if (!transporter) {
+      // Skip silently when not configured
+      return { skipped: true };
+    }
 
-export default sendEmail
+    const from = process.env.MAIL_FROM || 'no-reply@automobilesms.local';
+
+    const info = await transporter.sendMail({
+      from,
+      to,
+      subject,
+      text: text || undefined,
+      html: html || undefined,
+    });
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[mailer] sent:', info.messageId, 'to:', to);
+    }
+
+    return { ok: true, id: info.messageId };
+  } catch (err) {
+    console.error('[mailer] error:', err.message);
+    return { ok: false, error: err.message };
+  }
+};
+
+export const renderAppointmentEmail = ({ title, appointment }) => {
+  const dt = new Date(appointment.scheduledDate).toLocaleString();
+  const vehicle = appointment.vehicle
+    ? `${appointment.vehicle.make} ${appointment.vehicle.model} • ${appointment.vehicle.year} • ${appointment.vehicle.licensePlate}`
+    : 'Vehicle details';
+
+  return `
+  <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+    <h2>${title}</h2>
+    <p>Service: <strong>${(appointment.serviceType || '').replace(/-/g, ' ')}</strong></p>
+    <p>Date & Time: <strong>${dt}</strong></p>
+    <p>Vehicle: <strong>${vehicle}</strong></p>
+    ${appointment.description ? `<p>Description: ${appointment.description}</p>` : ''}
+    <p>Status: <strong>${appointment.status}</strong></p>
+    <hr />
+    <p>Thank you for choosing Automobile SMS.</p>
+  </div>
+  `;
+};

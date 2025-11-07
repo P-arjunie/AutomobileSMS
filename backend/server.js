@@ -8,18 +8,12 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import connectDB from './config/database.js';
 import authRoutes from './routes/auth.js';
-import vehicleRoutes from './routes/vehicles.js';
 import serviceRoutes from './routes/services.js';
 import appointmentRoutes from './routes/appointments.js';
 import employeeRoutes from './routes/employees.js';
 import vehicleRoutes from './routes/vehicles.js';
-import adminRoutes from './routes/admin.js';
-import reportRoutes from './routes/reports.js';
-import timeLogRoutes from './routes/timeLogs.js';
-import employeeWorkRoutes from './routes/employeeWork.js';
 import { authenticateToken } from './middleware/auth.js';
 import { setupSocketHandlers } from './socket/socketHandlers.js';
-import debugRoutes from './routes/debug.js';
 
 // Load environment variables
 dotenv.config();
@@ -77,18 +71,10 @@ app.get('/api/health', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/services', authenticateToken, serviceRoutes);
 app.use('/api/appointments', authenticateToken, appointmentRoutes);
-app.use('/api/time-logs', authenticateToken, timeLogRoutes);
-// IMPORTANT: employeeWorkRoutes must come BEFORE employeeRoutes (specific routes before parameterized routes)
-app.use('/api/employees', authenticateToken, employeeWorkRoutes);
 app.use('/api/employees', authenticateToken, employeeRoutes);
 app.use('/api/vehicles', authenticateToken, vehicleRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/reports', reportRoutes);
-// Dev-only debug routes
-app.use('/api/debug', debugRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

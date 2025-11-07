@@ -6,12 +6,6 @@ const appointmentSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  vehicleId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Vehicle',
-    required: false, // Optional - can be null for appointments made before vehicle management
-    index: true
-  },
   vehicle: {
     make: {
       type: String,
@@ -147,7 +141,6 @@ const appointmentSchema = new mongoose.Schema({
 
 // Indexes for better performance
 appointmentSchema.index({ customer: 1 });
-appointmentSchema.index({ vehicleId: 1 });
 appointmentSchema.index({ assignedEmployee: 1 });
 appointmentSchema.index({ status: 1 });
 appointmentSchema.index({ scheduledDate: 1 });

@@ -17,8 +17,6 @@
     "users:create:employee": "node scripts/users-cli.js create-employee",
     "users:create:admin": "node scripts/users-cli.js create-admin",
     "users:promote": "node scripts/users-cli.js promote"
-    "seed": "node scripts/seedTestData.js",
-    "reset-users": "node scripts/resetTestUsers.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -33,8 +31,6 @@
     "nodemailer": "^7.0.10",
     "socket.io": "^4.7.4",
     "validator": "^13.11.0"
-    "morgan": "^1.10.0",
-    "nodemailer": "^6.9.4"
   },
   "devDependencies": {
     "jest": "^29.7.0",

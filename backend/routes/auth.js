@@ -4,7 +4,6 @@ import crypto from 'crypto';
 import User from '../models/User.js';
 import Session from '../models/Session.js';
 import { authenticateToken } from '../middleware/auth.js';
-import { sendEmail } from '../utils/mailer.js';
 
 const router = express.Router();
 
@@ -21,40 +20,13 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // If creating an employee and no employeeId provided, generate one.
-    let resolvedEmployeeId = employeeId;
-    if (role === 'employee') {
-      // If provided, ensure uniqueness
-      if (resolvedEmployeeId) {
-        const existingEmployee = await User.findOne({ employeeId: resolvedEmployeeId });
-        if (existingEmployee) {
-          return res.status(400).json({ 
-            message: 'Employee ID already exists' 
-          });
-        }
-      } else {
-  // Generate a reasonably short unique employee id like EMP-XXXXXX
-        const maxAttempts = 5;
-        let attempt = 0;
-        let candidate;
-
-        while (attempt < maxAttempts) {
-          // 6 hex chars gives 16^6 ~ 16M combinations; prefix keeps it obvious
-          candidate = `EMP-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
-          // check uniqueness
-          // eslint-disable-next-line no-await-in-loop
-          const exists = await User.findOne({ employeeId: candidate });
-          if (!exists) {
-            resolvedEmployeeId = candidate;
-            break;
-          }
-          attempt++;
-        }
-
-        // Fallback: deterministic if all attempts collided (extremely unlikely)
-        if (!resolvedEmployeeId) {
-          resolvedEmployeeId = `EMP-${Date.now().toString().slice(-8)}`;
-        }
+    // Check if employeeId is unique (for employees)
+    if (employeeId) {
+      const existingEmployee = await User.findOne({ employeeId });
+      if (existingEmployee) {
+        return res.status(400).json({ 
+          message: 'Employee ID already exists' 
+        });
       }
     }
 
@@ -66,7 +38,7 @@ router.post('/register', async (req, res) => {
       password,
       phone,
       role: role || 'customer',
-      employeeId: resolvedEmployeeId,
+      employeeId,
       department
     });
 
@@ -88,21 +60,6 @@ router.post('/register', async (req, res) => {
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
     });
     await session.save();
-
-    // Create email verification token
-    try {
-      const verifyToken = crypto.randomBytes(32).toString('hex');
-      const verifyTokenHash = crypto.createHash('sha256').update(verifyToken).digest('hex');
-      user.verifyEmailToken = verifyTokenHash;
-      user.verifyEmailExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-      await user.save();
-
-      const verifyUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verifyToken}`;
-      const message = `Please verify your email by visiting the following link: ${verifyUrl}`;
-      await sendEmail({ to: user.email, subject: 'Verify your email', text: message });
-    } catch (emailErr) {
-      console.error('Failed to send verification email:', emailErr);
-    }
 
     res.status(201).json({
       message: 'User registered successfully',
@@ -377,106 +334,6 @@ router.put('/password', authenticateToken, async (req, res) => {
 
   } catch (error) {
     console.error('Password change error:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Forgot password - send reset email
-router.post('/forgot-password', async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ message: 'Email is required' });
-
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) return res.status(200).json({ message: 'If that email is registered, a reset link has been sent.' });
-
-    // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
-
-    user.resetPasswordToken = resetTokenHash;
-    user.resetPasswordExpire = Date.now() + 60 * 60 * 1000; // 1 hour
-    await user.save();
-
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
-    const message = `You requested a password reset. Use the link below to reset your password (valid for 1 hour):\n\n${resetUrl}`;
-
-    await sendEmail({ to: user.email, subject: 'Password reset', text: message });
-
-    res.json({ message: 'If that email is registered, a reset link has been sent.' });
-  } catch (error) {
-    console.error('Forgot password error:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Reset password
-router.post('/reset-password', async (req, res) => {
-  try {
-    const { token, newPassword } = req.body;
-    if (!token || !newPassword) return res.status(400).json({ message: 'Token and new password are required' });
-
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const user = await User.findOne({ resetPasswordToken: tokenHash, resetPasswordExpire: { $gt: Date.now() } }).select('+password');
-
-    if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
-
-    user.password = newPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
-    await user.save();
-
-    // Invalidate sessions
-    await Session.deleteMany({ userId: user._id });
-
-    res.json({ message: 'Password has been reset. Please login with your new password.' });
-  } catch (error) {
-    console.error('Reset password error:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Send verification email (resend) - authenticated
-router.post('/send-verification', authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    const verifyToken = crypto.randomBytes(32).toString('hex');
-    const verifyTokenHash = crypto.createHash('sha256').update(verifyToken).digest('hex');
-    user.verifyEmailToken = verifyTokenHash;
-    user.verifyEmailExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-    await user.save();
-
-    const verifyUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verifyToken}`;
-    const message = `Please verify your email by visiting the following link: ${verifyUrl}`;
-    await sendEmail({ to: user.email, subject: 'Verify your email', text: message });
-
-    res.json({ message: 'Verification email sent' });
-  } catch (error) {
-    console.error('Send verification error:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Verify email
-router.post('/verify-email', async (req, res) => {
-  try {
-    const { token } = req.body;
-    if (!token) return res.status(400).json({ message: 'Token is required' });
-
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const user = await User.findOne({ verifyEmailToken: tokenHash, verifyEmailExpire: { $gt: Date.now() } });
-    if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
-
-    user.isVerified = true;
-    user.verifyEmailToken = undefined;
-    user.verifyEmailExpire = undefined;
-    await user.save();
-
-    res.json({ message: 'Email verified successfully' });
-  } catch (error) {
-    console.error('Verify email error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

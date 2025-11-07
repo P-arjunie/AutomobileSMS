@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { useNavigate } from 'react-router-dom'
 import Header from './Header'
 import socketService from '../utils/socket'
 import { appointmentsAPI, servicesAPI } from '../utils/api'
 import toast from 'react-hot-toast'
 
 const Dashboard = () => {
-  const { user } = useAuth()
-  const navigate = useNavigate()
+  const { user, logout } = useAuth()
   const [appointments, setAppointments] = useState([])
   const [serviceLogs, setServiceLogs] = useState([])
   const [stats, setStats] = useState({
@@ -106,6 +105,10 @@ const Dashboard = () => {
     })
   }
 
+  const handleLogout = async () => {
+    await logout()
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -120,78 +123,9 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
-      {/* Admin Navigation Bar */}
-      {user.role === 'admin' && (
-        <div className="bg-blue-50 border-b border-blue-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-12">
-              <div className="flex items-center space-x-1">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                <span className="text-sm font-medium text-blue-800">Admin Tools</span>
-              </div>
-              <nav className="flex space-x-2">
-                <button
-                  onClick={() => navigate('/admin/dashboard')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-sm font-medium transition duration-200"
-                >
-                  Admin Dashboard
-                </button>
-                <button
-                  onClick={() => navigate('/admin/appointments')}
-                  className="text-blue-700 hover:text-blue-900 hover:bg-blue-100 px-3 py-1.5 rounded-md text-sm font-medium transition duration-200"
-                >
-                  All Appointments
-                </button>
-                <button
-                  onClick={() => navigate('/admin/services')}
-                  className="text-blue-700 hover:text-blue-900 hover:bg-blue-100 px-3 py-1.5 rounded-md text-sm font-medium transition duration-200"
-                >
-                  All Services
-                </button>
-                <button
-                  onClick={() => navigate('/admin/reports')}
-                  className="text-blue-700 hover:text-blue-900 hover:bg-blue-100 px-3 py-1.5 rounded-md text-sm font-medium transition duration-200"
-                >
-                  Reports
-                </button>
-              </nav>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        {/* Admin Notice Banner */}
-        {user.role === 'admin' && (
-          <div className="mb-6 bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <svg className="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                  <p className="text-sm font-medium text-blue-800">
-                    You are logged in as an administrator
-                  </p>
-                  <p className="text-sm text-blue-600">
-                    Access the full Admin Dashboard to view system-wide statistics, manage all appointments, and generate reports.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => navigate('/admin/dashboard')}
-                className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200 whitespace-nowrap"
-              >
-                Go to Admin Dashboard →
-              </button>
-            </div>
-          </div>
-        )}
-        
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
@@ -258,59 +192,6 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-
-        {/* Quick Actions for Customers */}
-        {user.role === 'customer' && (
-          <div className="bg-white shadow rounded-lg p-6 mb-8">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button
-                onClick={() => navigate('/vehicles')}
-                className="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-200"
-              >
-                <div className="flex-shrink-0">
-                  <svg className="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a2 2 0 012-2h2a2 2 0 012 2v4a3 3 0 01-3 3z" />
-                  </svg>
-                </div>
-                <div className="ml-4 text-left">
-                  <div className="text-sm font-medium text-gray-900">My Vehicles</div>
-                  <div className="text-sm text-gray-500">Manage your registered vehicles</div>
-                </div>
-              </button>
-              
-              <button
-                onClick={() => navigate('/book-appointment')}
-                className="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-200"
-              >
-                <div className="flex-shrink-0">
-                  <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div className="ml-4 text-left">
-                  <div className="text-sm font-medium text-gray-900">Book Service</div>
-                  <div className="text-sm text-gray-500">Schedule a service appointment</div>
-                </div>
-              </button>
-              
-              <button
-                onClick={() => navigate('/profile')}
-                className="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-200"
-              >
-                <div className="flex-shrink-0">
-                  <svg className="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <div className="ml-4 text-left">
-                  <div className="text-sm font-medium text-gray-900">My Profile</div>
-                  <div className="text-sm text-gray-500">Update your account information</div>
-                </div>
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Recent Appointments */}
         <div className="bg-white shadow rounded-lg">

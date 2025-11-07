@@ -60,7 +60,7 @@ const Register = () => {
     
     // Employee-specific validation
     if (formData.role === 'employee') {
-      // employeeId is optional on first-time registration; backend will auto-generate if omitted
+      if (!formData.employeeId.trim()) errors.employeeId = 'Employee ID is required'
       if (!formData.department) errors.department = 'Department is required'
     }
     
@@ -83,7 +83,7 @@ const Register = () => {
       phone: formData.phone.trim(),
       role: formData.role,
       ...(formData.role === 'employee' && {
-        ...(formData.employeeId && formData.employeeId.trim() ? { employeeId: formData.employeeId.trim() } : {}),
+        employeeId: formData.employeeId.trim(),
         department: formData.department
       })
     }
@@ -173,9 +173,8 @@ const Register = () => {
                         className={`block w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-purple focus:border-transparent transition duration-200 ${
                           formErrors.employeeId ? 'border-red-300' : 'border-primary-blue/30'
                         }`}
-                        placeholder="EMP001 (optional)"
+                        placeholder="EMP001"
                       />
-                      <p className="mt-1 text-xs text-gray-500">If you don't know an Employee ID yet, leave this blank and the system will generate one for you.</p>
                       {formErrors.employeeId && (
                         <p className="mt-1 text-sm text-red-600">{formErrors.employeeId}</p>
                       )}
