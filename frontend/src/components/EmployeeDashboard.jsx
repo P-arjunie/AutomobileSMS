@@ -148,33 +148,7 @@ const EmployeeDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-blue-600">Employee Dashboard</h1>
-              <nav className="flex space-x-4">
-                <Link
-                  to="/employee/time-logging"
-                  className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Time Logging
-                </Link>
-                <Link
-                  to="/employee/my-work"
-                  className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  My Work
-                </Link>
-              </nav>
-            </div>
-            <div className="text-sm text-gray-700">
-              Welcome, <span className="font-medium">{user.firstName} {user.lastName}</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Header is provided by App layout (role-aware) */}
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">

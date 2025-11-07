@@ -184,7 +184,7 @@ const Login = () => {
               </div>
 
               {/* Social Login Buttons */}
-              <div className="mt-6 grid grid-cols-2 gap-3">
+              {/* <div className="mt-6 grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   className="w-full inline-flex justify-center items-center py-2.5 px-4 border border-primary-blue/30 rounded-lg shadow-sm bg-white text-sm font-medium text-primary-dark hover:bg-primary-light transition duration-200"
@@ -206,7 +206,7 @@ const Login = () => {
                   </svg>
                   Facebook
                 </button>
-              </div>
+              </div> */}
             </div>
 
             {/* Sign Up Link */}

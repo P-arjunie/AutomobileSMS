@@ -20,6 +20,7 @@ const HeaderCustomer = () => {
             <nav className="ml-6 space-x-4">
               <Link to="/dashboard" className="text-sm text-gray-700 hover:text-primary-blue">Dashboard</Link>
               <Link to="/vehicles" className="text-sm text-gray-700 hover:text-primary-blue">My Vehicles</Link>
+              <Link to="/appointments/my" className="text-sm text-gray-700 hover:text-primary-blue">My Appointments</Link>
               <Link to="/book-appointment" className="text-sm text-gray-700 hover:text-primary-blue">Book Service</Link>
               <Link to="/home" className="text-sm text-gray-700 hover:text-primary-blue">Home</Link>
             </nav>
