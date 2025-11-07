@@ -22,7 +22,6 @@ import Profile from './components/Profile'
 import ForgotPassword from './components/ForgotPassword'
 import ResetPassword from './components/ResetPassword'
 import VerifyEmail from './components/VerifyEmail'
-import BookAppointment from './components/BookAppointment'
 import MyAppointments from './components/MyAppointments'
 
 // Protected Route component
