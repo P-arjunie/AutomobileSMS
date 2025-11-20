@@ -60,6 +60,12 @@ export const setupSocketHandlers = (io) => {
       });
     });
 
+    // Handle joining specific service rooms
+    socket.on('join-service', (serviceId) => {
+      console.log(`User ${socket.user.firstName} joined service ${serviceId}`);
+      socket.join(`service:${serviceId}`);
+    });
+
     // Handle leaving appointment rooms
     socket.on('leave-appointment', (appointmentId) => {
       console.log(`User ${socket.user.firstName} left appointment ${appointmentId}`);
@@ -239,6 +245,10 @@ export const setupSocketHandlers = (io) => {
     io.to(`appointment:${appointmentId}`).emit(event, data);
   };
 
+  const emitToService = (serviceId, event, data) => {
+    io.to(`service:${serviceId}`).emit(event, data);
+  };
+
   const emitToDepartment = (department, event, data) => {
     io.to(`department:${department}`).emit(event, data);
   };
@@ -248,6 +258,7 @@ export const setupSocketHandlers = (io) => {
   io.emitToRole = emitToRole;
   io.emitToAppointment = emitToAppointment;
   io.emitToDepartment = emitToDepartment;
+  io.emitToService = emitToService;
 
   console.log('🚀 Socket.IO handlers setup complete');
 };

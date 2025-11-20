@@ -1,5 +1,6 @@
 import express from 'express';
 import Appointment from '../models/Appointment.js';
+import ServiceProject from '../models/ServiceProject.js';
 import { authorize } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -214,6 +215,14 @@ router.post('/', async (req, res) => {
 
     const appointment = new Appointment(appointmentData);
     await appointment.save();
+
+    // Create a corresponding service project
+    const serviceProject = new ServiceProject({
+      appointment_id: appointment._id,
+      // You can set a default assigned employee or leave it empty
+      // assigned_employee_id: ... 
+    });
+    await serviceProject.save();
 
     await appointment.populate('customer', 'firstName lastName email phone');
 

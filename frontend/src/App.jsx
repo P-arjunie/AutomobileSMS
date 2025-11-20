@@ -24,6 +24,8 @@ import ForgotPassword from './components/ForgotPassword'
 import ResetPassword from './components/ResetPassword'
 import VerifyEmail from './components/VerifyEmail'
 import MyAppointments from './components/MyAppointments'
+import LiveServiceTracker from './components/LiveServiceTracker'
+import ServiceStatusUpdater from './components/ServiceStatusUpdater'
 import HeaderCustomer from './components/headers/HeaderCustomer'
 import HeaderEmployee from './components/headers/HeaderEmployee'
 import HeaderAdmin from './components/headers/HeaderAdmin'
@@ -181,6 +183,12 @@ function AppContent() {
             </ProtectedRoute>
           } />
 
+          <Route path="/service-tracker/:id" element={
+            <ProtectedRoute>
+              <LiveServiceTracker />
+            </ProtectedRoute>
+          } />
+
           <Route path="/home" element={
             <ProtectedRoute>
               <Home />
@@ -235,6 +243,12 @@ function AppContent() {
           <Route path="/employee/modification-requests" element={
             <EmployeeRoute>
               <ModificationRequests />
+            </EmployeeRoute>
+          } />
+
+          <Route path="/employee/service-updater/:id" element={
+            <EmployeeRoute>
+              <ServiceStatusUpdater />
             </EmployeeRoute>
           } />
           
