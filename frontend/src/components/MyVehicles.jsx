@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrashIcon, PencilIcon, EyeIcon, PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import Header from './Header';
+// Header is provided by App layout (role-aware)
 import LoadingSpinner from './LoadingSpinner';
 import VehicleForm from './VehicleForm';
 import { vehiclesAPI } from '../utils/api';
@@ -111,24 +111,24 @@ const MyVehicles = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <div className="min-h-screen bg-gradient-to-br from-primary-light via-primary-blue/20 to-primary-purple/30">
+      {/* header provided by App layout */}
       
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="md:flex md:items-center md:justify-between mb-6">
           <div className="flex-1 min-w-0">
-            <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+            <h2 className="text-2xl font-bold leading-7 text-primary-dark sm:text-3xl sm:truncate">
               My Vehicles
             </h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-primary-dark/70">
               Manage your registered vehicles and view service history
             </p>
           </div>
           <div className="mt-4 flex md:mt-0 md:ml-4">
             <button
               onClick={handleAddVehicle}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-xl shadow-sm text-white bg-gradient-to-r from-primary-blue to-primary-purple hover:from-primary-purple hover:to-primary-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue transform hover:scale-[1.02] transition duration-200"
             >
               <PlusIcon className="h-4 w-4 mr-2" />
               Add Vehicle
@@ -137,19 +137,19 @@ const MyVehicles = () => {
         </div>
 
         {/* Search and Filter Controls */}
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-primary-blue/10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                <MagnifyingGlassIcon className="h-5 w-5 text-primary-blue" />
               </div>
               <input
                 type="text"
                 placeholder="Search vehicles..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full pl-10 pr-3 py-2 border border-primary-blue/30 rounded-lg leading-5 bg-white placeholder-primary-dark/50 focus:outline-none focus:placeholder-primary-dark/30 focus:ring-2 focus:ring-primary-purple focus:border-transparent transition duration-200"
               />
             </div>
 
@@ -158,7 +158,7 @@ const MyVehicles = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-3 py-2 border border-primary-blue/30 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent transition duration-200"
               >
                 <option value="createdAt">Sort by Date Added</option>
                 <option value="make">Sort by Make</option>
@@ -172,7 +172,7 @@ const MyVehicles = () => {
               <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-3 py-2 border border-primary-blue/30 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent transition duration-200"
               >
                 <option value="desc">Descending</option>
                 <option value="asc">Ascending</option>
@@ -184,17 +184,17 @@ const MyVehicles = () => {
         {/* Vehicles Grid */}
         {vehicles.length === 0 ? (
           <div className="text-center py-12">
-            <div className="mx-auto h-12 w-12 text-gray-400">
+            <div className="mx-auto h-12 w-12 text-primary-blue">
               🚗
             </div>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No vehicles</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <h3 className="mt-2 text-sm font-medium text-primary-dark">No vehicles</h3>
+            <p className="mt-1 text-sm text-primary-dark/70">
               Get started by adding your first vehicle.
             </p>
             <div className="mt-6">
               <button
                 onClick={handleAddVehicle}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-xl text-white bg-gradient-to-r from-primary-blue to-primary-purple hover:from-primary-purple hover:to-primary-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue transform hover:scale-[1.02] transition duration-200"
               >
                 <PlusIcon className="h-4 w-4 mr-2" />
                 Add Vehicle
@@ -204,7 +204,7 @@ const MyVehicles = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {vehicles.map((vehicle) => (
-              <div key={vehicle._id} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
+              <div key={vehicle._id} className="bg-white overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-primary-blue/10">
                 {/* Vehicle Image */}
                 <div className="h-48 bg-gray-200 relative">
                   {vehicle.imageUrl ? (
@@ -241,41 +241,41 @@ const MyVehicles = () => {
                 {/* Vehicle Info */}
                 <div className="p-6">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-gray-900 truncate">
+                    <h3 className="text-lg font-medium text-primary-dark truncate">
                       {vehicle.year} {vehicle.make} {vehicle.model}
                     </h3>
                   </div>
                   
                   <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                     <div>
-                      <dt className="text-gray-500">License Plate</dt>
-                      <dd className="text-gray-900 font-medium">{vehicle.licensePlate}</dd>
+                      <dt className="text-primary-dark/70">License Plate</dt>
+                      <dd className="text-primary-dark font-medium">{vehicle.licensePlate}</dd>
                     </div>
                     <div>
-                      <dt className="text-gray-500">Color</dt>
-                      <dd className="text-gray-900">{vehicle.color}</dd>
+                      <dt className="text-primary-dark/70">Color</dt>
+                      <dd className="text-primary-dark">{vehicle.color}</dd>
                     </div>
                     <div>
-                      <dt className="text-gray-500">Mileage</dt>
-                      <dd className="text-gray-900">{vehicle.mileage?.toLocaleString()} mi</dd>
+                      <dt className="text-primary-dark/70">Mileage</dt>
+                      <dd className="text-primary-dark">{vehicle.mileage?.toLocaleString()} mi</dd>
                     </div>
                     <div>
-                      <dt className="text-gray-500">Services</dt>
-                      <dd className="text-gray-900">{vehicle.serviceCount || 0}</dd>
+                      <dt className="text-primary-dark/70">Services</dt>
+                      <dd className="text-primary-dark">{vehicle.serviceCount || 0}</dd>
                     </div>
                   </dl>
 
                   {/* Last Service */}
                   <div className="mt-4 text-sm">
-                    <span className="text-gray-500">Last Service: </span>
-                    <span className="text-gray-900">{formatDate(vehicle.lastServiceDate)}</span>
+                    <span className="text-primary-dark/70">Last Service: </span>
+                    <span className="text-primary-dark">{formatDate(vehicle.lastServiceDate)}</span>
                   </div>
 
                   {/* Actions */}
                   <div className="mt-6 flex justify-between items-center">
                     <button
                       onClick={() => navigate(`/vehicles/${vehicle._id}/history`)}
-                      className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="inline-flex items-center px-3 py-1 border border-primary-blue/30 shadow-sm text-sm font-medium rounded-lg text-primary-blue bg-white hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue transition duration-200"
                     >
                       <EyeIcon className="h-4 w-4 mr-1" />
                       History
@@ -284,13 +284,13 @@ const MyVehicles = () => {
                     <div className="flex space-x-2">
                       <button
                         onClick={() => handleEditVehicle(vehicle)}
-                        className="inline-flex items-center p-2 border border-transparent rounded-md text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        className="inline-flex items-center p-2 border border-transparent rounded-lg text-primary-blue hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue transition duration-200"
                       >
                         <PencilIcon className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteVehicle(vehicle)}
-                        className="inline-flex items-center p-2 border border-transparent rounded-md text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        className="inline-flex items-center p-2 border border-transparent rounded-lg text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-200"
                       >
                         <TrashIcon className="h-4 w-4" />
                       </button>
@@ -317,14 +317,14 @@ const MyVehicles = () => {
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-2xl rounded-2xl bg-white">
               <div className="mt-3 text-center">
                 <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                   <TrashIcon className="h-6 w-6 text-red-600" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mt-2">Delete Vehicle</h3>
+                <h3 className="text-lg font-medium text-primary-dark mt-2">Delete Vehicle</h3>
                 <div className="mt-2 px-7 py-3">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-primary-dark/70">
                     Are you sure you want to delete <strong>{vehicleToDelete?.year} {vehicleToDelete?.make} {vehicleToDelete?.model}</strong>?
                     This action cannot be undone.
                   </p>
@@ -336,13 +336,13 @@ const MyVehicles = () => {
                         setShowDeleteConfirm(false);
                         setVehicleToDelete(null);
                       }}
-                      className="flex-1 px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                      className="flex-1 px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-xl shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-200"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={confirmDelete}
-                      className="flex-1 px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
+                      className="flex-1 px-4 py-2 bg-red-600 text-white text-base font-medium rounded-xl shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 transition duration-200"
                     >
                       Delete
                     </button>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon, CalendarIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import Header from './Header';
+// Header is provided by App layout (role-aware)
 import LoadingSpinner from './LoadingSpinner';
 import { vehiclesAPI } from '../utils/api';
 
@@ -117,14 +117,14 @@ const VehicleHistory = () => {
 
   if (!vehicle) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
+      <div className="min-h-screen bg-gradient-to-br from-primary-light via-primary-blue/20 to-primary-purple/30">
+        {/* header provided by App layout */}
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900">Vehicle not found</h2>
+            <h2 className="text-2xl font-bold text-primary-dark">Vehicle not found</h2>
             <button
               onClick={() => navigate('/vehicles')}
-              className="mt-4 text-blue-600 hover:text-blue-700"
+              className="mt-4 text-primary-blue hover:text-primary-purple transition duration-200"
             >
               ← Back to Vehicles
             </button>
@@ -135,15 +135,15 @@ const VehicleHistory = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <div className="min-h-screen bg-gradient-to-br from-primary-light via-primary-blue/20 to-primary-purple/30">
+      {/* header provided by App layout */}
       
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Navigation */}
         <div className="mb-6">
           <button
             onClick={() => navigate('/vehicles')}
-            className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+            className="inline-flex items-center text-primary-blue hover:text-primary-purple font-medium transition duration-200"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-2" />
             Back to Vehicles
@@ -151,18 +151,18 @@ const VehicleHistory = () => {
         </div>
 
         {/* Vehicle Information Card */}
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-primary-blue/10">
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-4">
               <div className="text-6xl">
                 {getEngineTypeIcon(vehicle.engineType)}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-primary-dark">
                   {vehicle.year} {vehicle.make} {vehicle.model}
                 </h1>
-                <p className="text-gray-600 mt-1">{vehicle.licensePlate}</p>
-                <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                <p className="text-primary-dark/70 mt-1">{vehicle.licensePlate}</p>
+                <div className="flex items-center space-x-4 mt-2 text-sm text-primary-dark/60">
                   <span>VIN: {vehicle.vin}</span>
                   <span>•</span>
                   <span>{vehicle.color}</span>
@@ -172,30 +172,30 @@ const VehicleHistory = () => {
               </div>
             </div>
             <div className="text-right">
-              <div className="text-sm text-gray-500">Total Services</div>
-              <div className="text-2xl font-bold text-blue-600">{pagination.totalAppointments}</div>
+              <div className="text-sm text-primary-dark/70">Total Services</div>
+              <div className="text-2xl font-bold text-primary-blue">{pagination.totalAppointments}</div>
             </div>
           </div>
           
           {vehicle.notes && (
-            <div className="mt-4 p-3 bg-gray-50 rounded-md">
-              <div className="text-sm font-medium text-gray-700">Notes:</div>
-              <div className="text-sm text-gray-600 mt-1">{vehicle.notes}</div>
+            <div className="mt-4 p-3 bg-primary-light/50 rounded-lg border border-primary-blue/20">
+              <div className="text-sm font-medium text-primary-dark">Notes:</div>
+              <div className="text-sm text-primary-dark/70 mt-1">{vehicle.notes}</div>
             </div>
           )}
         </div>
 
         {/* Filters */}
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-primary-blue/10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-primary-dark mb-1">
                 Filter by Status
               </label>
               <select
                 value={filters.status}
                 onChange={(e) => handleFilterChange('status', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-primary-blue/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent transition duration-200"
               >
                 <option value="">All Statuses</option>
                 <option value="pending">Pending</option>
@@ -207,13 +207,13 @@ const VehicleHistory = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-primary-dark mb-1">
                 Items per Page
               </label>
               <select
                 value={filters.limit}
                 onChange={(e) => handleFilterChange('limit', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-primary-blue/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent transition duration-200"
               >
                 <option value={5}>5 per page</option>
                 <option value={10}>10 per page</option>
@@ -225,19 +225,19 @@ const VehicleHistory = () => {
         </div>
 
         {/* Service History */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900 flex items-center">
-              <WrenchScrewdriverIcon className="h-5 w-5 mr-2" />
+        <div className="bg-white rounded-2xl shadow-lg border border-primary-blue/10">
+          <div className="px-6 py-4 border-b border-primary-blue/20 bg-gradient-to-r from-primary-blue/10 to-primary-purple/10 rounded-t-2xl">
+            <h3 className="text-lg font-medium text-primary-dark flex items-center">
+              <WrenchScrewdriverIcon className="h-5 w-5 mr-2 text-primary-blue" />
               Service History
             </h3>
           </div>
 
           {appointments.length === 0 ? (
             <div className="text-center py-12">
-              <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No service history</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <CalendarIcon className="mx-auto h-12 w-12 text-primary-blue" />
+              <h3 className="mt-2 text-sm font-medium text-primary-dark">No service history</h3>
+              <p className="mt-1 text-sm text-primary-dark/70">
                 {filters.status ? 'No appointments found with the selected status.' : 'This vehicle has no service appointments yet.'}
               </p>
             </div>
@@ -245,35 +245,35 @@ const VehicleHistory = () => {
             <>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-gradient-to-r from-primary-blue/5 to-primary-purple/5">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-primary-dark uppercase tracking-wider">
                         Service Type
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-primary-dark uppercase tracking-wider">
                         Scheduled Date
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-primary-dark uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-primary-dark uppercase tracking-wider">
                         Assigned To
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-primary-dark uppercase tracking-wider">
                         Cost
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-primary-dark uppercase tracking-wider">
                         Created
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-primary-blue/10">
                     {appointments.map((appointment) => (
-                      <tr key={appointment._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <tr key={appointment._id} className="hover:bg-primary-light/30 transition-colors duration-200">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-primary-dark">
                           {appointment.serviceType?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'N/A'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-primary-dark">
                           {formatDate(appointment.scheduledDate)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -281,13 +281,13 @@ const VehicleHistory = () => {
                             {appointment.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-primary-dark">
                           {appointment.assignedTo 
                             ? `${appointment.assignedTo.firstName} ${appointment.assignedTo.lastName}`
                             : 'Not assigned'
                           }
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-primary-dark">
                           {appointment.actualCost 
                             ? `$${appointment.actualCost.toFixed(2)}`
                             : appointment.estimatedCost 
@@ -295,7 +295,7 @@ const VehicleHistory = () => {
                               : 'N/A'
                           }
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-primary-dark">
                           {formatDateTime(appointment.createdAt)}
                         </td>
                       </tr>
@@ -306,39 +306,39 @@ const VehicleHistory = () => {
 
               {/* Pagination */}
               {pagination.totalPages > 1 && (
-                <div className="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+                <div className="bg-white px-6 py-3 border-t border-primary-blue/20 flex items-center justify-between rounded-b-2xl">
                   <div className="flex-1 flex justify-between sm:hidden">
                     <button
                       onClick={() => handlePageChange(pagination.currentPage - 1)}
                       disabled={!pagination.hasPrevPage}
-                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="relative inline-flex items-center px-4 py-2 border border-primary-blue/30 text-sm font-medium rounded-lg text-primary-blue bg-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
                     >
                       Previous
                     </button>
                     <button
                       onClick={() => handlePageChange(pagination.currentPage + 1)}
                       disabled={!pagination.hasNextPage}
-                      className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="ml-3 relative inline-flex items-center px-4 py-2 border border-primary-blue/30 text-sm font-medium rounded-lg text-primary-blue bg-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
                     >
                       Next
                     </button>
                   </div>
                   <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-sm text-gray-700">
-                        Showing <span className="font-medium">{((pagination.currentPage - 1) * filters.limit) + 1}</span> to{' '}
-                        <span className="font-medium">
+                      <p className="text-sm text-primary-dark/70">
+                        Showing <span className="font-medium text-primary-dark">{((pagination.currentPage - 1) * filters.limit) + 1}</span> to{' '}
+                        <span className="font-medium text-primary-dark">
                           {Math.min(pagination.currentPage * filters.limit, pagination.totalAppointments)}
                         </span> of{' '}
-                        <span className="font-medium">{pagination.totalAppointments}</span> results
+                        <span className="font-medium text-primary-dark">{pagination.totalAppointments}</span> results
                       </p>
                     </div>
                     <div>
-                      <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                      <nav className="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px">
                         <button
                           onClick={() => handlePageChange(pagination.currentPage - 1)}
                           disabled={!pagination.hasPrevPage}
-                          className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="relative inline-flex items-center px-2 py-2 rounded-l-lg border border-primary-blue/30 bg-white text-sm font-medium text-primary-blue hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
                         >
                           Previous
                         </button>
@@ -348,10 +348,10 @@ const VehicleHistory = () => {
                             <button
                               key={page}
                               onClick={() => handlePageChange(page)}
-                              className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                              className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition duration-200 ${
                                 page === pagination.currentPage
-                                  ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                                  ? 'z-10 bg-primary-blue border-primary-blue text-white'
+                                  : 'bg-white border-primary-blue/30 text-primary-blue hover:bg-primary-light'
                               }`}
                             >
                               {page}
@@ -361,7 +361,7 @@ const VehicleHistory = () => {
                         <button
                           onClick={() => handlePageChange(pagination.currentPage + 1)}
                           disabled={!pagination.hasNextPage}
-                          className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="relative inline-flex items-center px-2 py-2 rounded-r-lg border border-primary-blue/30 bg-white text-sm font-medium text-primary-blue hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
                         >
                           Next
                         </button>
