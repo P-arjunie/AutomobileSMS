@@ -14,7 +14,8 @@
     "appointments:list": "node scripts/appointments-cli.js list",
     "appointments:update": "node scripts/appointments-cli.js update-status",
     "appointments:cancel": "node scripts/appointments-cli.js cancel",
-    "appointments:delete": "node scripts/appointments-cli.js delete"
+    "appointments:delete": "node scripts/appointments-cli.js delete",
+    "create-custom-admin": "node scripts/create-custom-admin.js"
   },
   "dependencies": {
     "express": "^4.18.2",
